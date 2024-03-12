@@ -10,6 +10,8 @@ import 'package:face_net_authentication/pages/widgets/app_button.dart';
 import 'package:face_net_authentication/pages/widgets/app_text_field.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 
+import '../../constants/constants.dart';
+
 class PresensiDinasluarSheet extends StatefulWidget {
   PresensiDinasluarSheet({Key? key, required this.user}) : super(key: key);
   final User user;
@@ -35,7 +37,7 @@ class _PresensiDinasluarSheetState extends State<PresensiDinasluarSheet> {
     if (user.password == _passwordController.text) {
       try {
         final response = await http.post(
-          Uri.parse('https://sisensio.unand.ac.id/presensi/absensimasuk.php'),
+          Uri.parse(Constants.BASEURL + Constants.ABSENSIMASUK),
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },

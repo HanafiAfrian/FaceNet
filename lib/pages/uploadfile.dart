@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 
+import '../constants/constants.dart';
+
 class UploadFile extends StatefulWidget {
   final String nip;
 
@@ -33,7 +35,7 @@ class _UploadFileState extends State<UploadFile> {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.18.12/presensi/upload_file.php'),
+        Uri.parse(Constants.BASEURL + Constants.UPLOADABSENSI),
       );
 
       request.fields['nip'] = widget.nip;

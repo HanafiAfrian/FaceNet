@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:io';
+import 'package:face_net_authentication/constants/constants.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:face_net_authentication/pages/home.dart';
 import 'package:face_net_authentication/pages/presensi-auth.dart';
@@ -141,7 +142,7 @@ class _ProfileState extends State<Profile> {
   }
 
   final String historiPresensiURL =
-      "https://sisensio.unand.ac.id/presensi/historiabsensi.php";
+      Constants.BASEURL + Constants.HISTORIABSENSI;
 
   Future<List<Map<String, dynamic>>> fetchHistoriPresensiByUsername(
       String username) async {
@@ -166,8 +167,9 @@ class _ProfileState extends State<Profile> {
       return;
     }
 
-    final Uri url = Uri.parse(
-        "https://sisensio.unand.ac.id/presensi/mencarijarakterdekat.php?username=$username&latitude=$_latitude&longitude=$_longitude");
+    final Uri url = Uri.parse(Constants.BASEURL +
+        Constants.CARIJARAKTERDEKAT +
+        "?username=$username&latitude=$_latitude&longitude=$_longitude");
 
     try {
       final response = await http.get(url);

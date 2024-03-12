@@ -13,6 +13,8 @@ import 'package:camera/camera.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/constants.dart';
+
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
 
@@ -102,7 +104,7 @@ class SignUpState extends State<SignUp> {
 
   Future<bool> uploadImageToServer(String imagePath) async {
     try {
-      var uri = Uri.parse('https://sisensio.unand.ac.id/presensi/register.php');
+      var uri = Uri.parse(Constants.BASEURL + Constants.REGISTER);
       var request = http.MultipartRequest('POST', uri);
 
       // Menambahkan file gambar ke permintaan multipart

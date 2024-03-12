@@ -1,3 +1,4 @@
+import 'package:face_net_authentication/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -113,7 +114,7 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
     } else if (user.password == _passwordController.text) {
       try {
         final response = await http.post(
-          Uri.parse('https://sisensio.unand.ac.id/presensi/absensikeluar.php'),
+          Uri.parse(Constants.BASEURL+Constants.ABSENSIKELUAR),
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },

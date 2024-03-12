@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
+import '../../constants/constants.dart';
+
 class PresensiInSheet extends StatefulWidget {
   PresensiInSheet({Key? key, required this.user}) : super(key: key);
   final User user;
@@ -113,7 +115,7 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
     } else if (user.password == _passwordController.text) {
       try {
         final response = await http.post(
-          Uri.parse('https://sisensio.unand.ac.id/presensi/absensimasuk.php'),
+          Uri.parse(Constants.BASEURL + Constants.ABSENSIMASUK),
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },

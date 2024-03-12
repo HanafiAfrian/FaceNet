@@ -7,6 +7,7 @@ import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart';
+import '../../constants/constants.dart';
 import '../home.dart';
 import 'app_text_field.dart';
 import 'package:http/http.dart' as http;
@@ -73,7 +74,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
 
   Future<void> _sendDataToServer(
       String nip, String user, String password, List predictedData) async {
-    var url = Uri.parse('https://sisensio.unand.ac.id/presensi/register.php');
+    var url = Uri.parse(Constants.BASEURL + Constants.REGISTER);
 
     var response = await http.post(url, body: {
       'nip': nip,
