@@ -28,7 +28,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   bool _isPictureTaken = false;
   bool _isInitializing = false;
-
+  bool _isFaceDetectorInitialized = false; // Tambah variabel ini
   @override
   void initState() {
     super.initState();
@@ -46,7 +46,12 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
   Future _start() async {
     setState(() => _isInitializing = true);
     await _cameraService.initialize();
-    setState(() => _isInitializing = false);
+    _faceDetectorService.initialize(); // Inisialisasi detektor wajah
+    setState(() {
+      _isInitializing = false;
+      _isFaceDetectorInitialized =
+          true; // Atur menjadi true setelah inisialisasi selesai
+    });
     _frameFaces();
   }
 
@@ -63,11 +68,17 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   Future<void> _predictFacesFromImage({@required CameraImage? image}) async {
     assert(image != null, 'Image is null');
-    await _faceDetectorService.detectFacesFromImage(image!);
-    if (_faceDetectorService.faceDetected) {
-      _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
+    if (_isFaceDetectorInitialized) {
+      // Periksa apakah detektor wajah sudah diinisialisasi
+      await _faceDetectorService.detectFacesFromImage(image!);
+      if (_faceDetectorService.faceDetected) {
+        _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
+      }
+      if (mounted) setState(() {});
+    } else {
+      // Tambahkan penanganan ketika detektor wajah belum diinisialisasi.
+      print('Face detector service is not initialized yet.');
     }
-    if (mounted) setState(() {});
   }
 
   Future<void> takePicture() async {
@@ -110,9 +121,9 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   @override
   Widget build(BuildContext context) {
-    Widget header =
-        CameraHeader("PRESENSI DINAS LUAR", onBackPressed: _onBackPressed);
-    Widget body = getBodyWidget();
+    Widget header = Flexible(
+        child: CameraHeader("DINAS LUAR", onBackPressed: _onBackPressed));
+    Widget body = SingleChildScrollView(child: getBodyWidget());
     Widget? fab;
     if (!_isPictureTaken) fab = AuthButton(onTap: onTap);
 

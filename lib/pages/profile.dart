@@ -110,7 +110,9 @@ class _ProfileState extends State<Profile> {
           _latitude = values.latitude?.toString() ?? "N/A";
           _longitude = values.longitude?.toString() ?? "N/A";
           _isMockLocation = values.isMockLocation ?? false;
+          print("mocklocation 1: $_isMockLocation");
         });
+        print("mocklocation 2: $_isMockLocation");
         if (_isMockLocation) {
           showDialog(
             context: context,
@@ -146,9 +148,9 @@ class _ProfileState extends State<Profile> {
 
   Future<List<Map<String, dynamic>>> fetchHistoriPresensiByUsername(
       String username) async {
-    final Uri url = Uri.parse("$historiPresensiURL?username=$username");
+    final Uri url = Uri.parse("${historiPresensiURL}?username=$username");
     final response = await http.get(url);
-
+    print("url : $url");
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       return List<Map<String, dynamic>>.from(data);
