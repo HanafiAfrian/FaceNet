@@ -241,7 +241,8 @@ class _ProfileState extends State<Profile> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         if (serverResponse == 'false')
-                          Expanded(
+                          Flexible(
+                            fit: FlexFit.loose,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -297,7 +298,8 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                         if (serverResponse == 'true')
-                          Expanded(
+                          Flexible(
+                            fit: FlexFit.loose,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -341,7 +343,8 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                         if (serverResponse == 'false')
-                          Expanded(
+                          Flexible(
+                            fit: FlexFit.loose,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -397,7 +400,8 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                         if (serverResponse == 'true')
-                          Expanded(
+                          Flexible(
+                            fit: FlexFit.loose,
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
@@ -446,7 +450,8 @@ class _ProfileState extends State<Profile> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Expanded(
+                        Flexible(
+                          fit: FlexFit.loose,
                           child: InkWell(
                             onTap: launchURL,
                             child: Container(
@@ -492,7 +497,8 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                         ),
-                        Expanded(
+                        Flexible(
+                          fit: FlexFit.loose,
                           child: InkWell(
                             onTap: _launchURL,
                             child: Container(

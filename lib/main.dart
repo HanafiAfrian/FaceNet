@@ -1,5 +1,6 @@
 import 'package:face_net_authentication/locator.dart';
 import 'package:face_net_authentication/pages/home.dart';
+import 'package:face_net_authentication/pages/pages/splashscreen_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(),
+      home: SplashScreenPage(),
       debugShowCheckedModeBanner: false,
     );
   }

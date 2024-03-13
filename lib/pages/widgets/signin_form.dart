@@ -5,6 +5,7 @@ import 'package:face_net_authentication/pages/widgets/app_button.dart';
 import 'package:face_net_authentication/pages/widgets/app_text_field.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInSheet extends StatelessWidget {
   SignInSheet({Key? key, required this.user}) : super(key: key);
@@ -14,7 +15,11 @@ class SignInSheet extends StatelessWidget {
   final _cameraService = locator<CameraService>();
 
   Future _signIn(context, user) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("nip", user.nip);
+    preferences.setString("path", _cameraService.imagePath!);
     if (user.password == _passwordController.text) {
+      preferences.setBool("login", true);
       Navigator.push(
           context,
           MaterialPageRoute(
