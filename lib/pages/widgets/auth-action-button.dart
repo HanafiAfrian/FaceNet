@@ -69,27 +69,64 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     );
 
     // Mengirim data ke server setelah menghapus data prediksi
-    await _sendDataToServer(nip, user, password, predictedData);
+    await _sendDataToServer(
+        nip, user, password, predictedData, _cameraService.imagePath);
   }
 
-  Future<void> _sendDataToServer(
-      String nip, String user, String password, List predictedData) async {
-    var url = Uri.parse(Constants.BASEURL + Constants.REGISTER);
+  Future<void> _sendDataToServer(String nip, String user, String password,
+      List predictedData, String? imagePath) async {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse(Constants.BASEURL + Constants.REGISTER),
+    );
 
-    var response = await http.post(url, body: {
-      'nip': nip,
-      'user': user,
-      'password': password,
-      'modelData': predictedData.toString(),
-    });
+    request.fields['nip'] = nip;
+    request.fields['user'] = user;
+    request.fields['password'] = password;
+    request.fields['modelData'] = predictedData.toString();
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'user_image',
+        imagePath!,
+      ),
+    );
+
+    var response = await request.send();
 
     if (response.statusCode == 200) {
+      // File berhasil diunggah
+      // Tambahkan logika atau tindakan yang diperlukan setelah pengunggahan file
+      print('File uploaded successfully');
       print('Data berhasil dikirim ke server.');
     } else {
-      print(
-          'Gagal mengirim data ke server. Kode status: ${response.statusCode}');
-      // Tampilkan pesan atau lakukan tindakan kesalahan sesuai kebutuhan
+      // Gagal mengunggah file
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+                'Failed to upload file. Status Code: ${response.statusCode}'),
+          );
+        },
+      );
     }
+
+    // var url = Uri.parse(Constants.BASEURL + Constants.REGISTER);
+
+    // var response = await http.post(url, body: {
+    //   'nip': nip,
+    //   'user': user,
+    //   'password': password,
+    //   'modelData': predictedData.toString(),
+    // });
+    // print('modelData:' + predictedData.toString());
+    // if (response.statusCode == 200) {
+    //   print('Data berhasil dikirim ke server.');
+    // } else {
+    //   print(
+    //       'Gagal mengirim data ke server. Kode status: ${response.statusCode}');
+    //   // Tampilkan pesan atau lakukan tindakan kesalahan sesuai kebutuhan
+    // }
   }
 
   Future _signIn(context) async {
@@ -227,7 +264,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Colors.blue[200],
+          color: Colors.green,
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.blue.withOpacity(0.1),
