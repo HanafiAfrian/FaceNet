@@ -83,26 +83,33 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Image(image: AssetImage('assets/logo.png')),
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        child: Column(
-                          children: [
-                            Text(
-                              "ANDALASIAN",
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                          ],
+                      Image(image: AssetImage('assets/loginand.png')),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: Image(
+                          image: AssetImage('assets/presensian.png'),
+                          width: 300,
                         ),
                       ),
+                      // Container(
+                      //   width: MediaQuery.of(context).size.width * 0.8,
+                      //   child: Column(
+                      //     children: [
+                      //       Text(
+                      //         "ANDALASIAN",
+                      //         style: TextStyle(
+                      //           fontSize: 25,
+                      //           fontWeight: FontWeight.bold,
+                      //           color: Colors.green,
+                      //         ),
+                      //         textAlign: TextAlign.center,
+                      //       ),
+                      //       SizedBox(
+                      //         height: 20,
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                       Column(
                         children: [
                           InkWell(
