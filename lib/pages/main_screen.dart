@@ -47,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
                     });
                   },
                   children: [
-                    DashboardView(),
+                    DashboardView(username: "333"),
                     PresenceView(),
                   ],
                 ),

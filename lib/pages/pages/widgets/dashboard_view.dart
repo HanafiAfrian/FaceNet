@@ -1,13 +1,199 @@
+import 'dart:convert';
+
+import 'package:face_net_authentication/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:location_permissions/location_permissions.dart';
+import 'package:trust_location/trust_location.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/colors.dart';
+import '../../../constants/constants.dart';
 import '../../../constants/fonts.dart';
 import '../../../constants/sizes.dart';
 import '../../../utils/alert_utils.dart';
 
-class DashboardView extends StatelessWidget {
+import 'package:http/http.dart' as http;
+
+import '../../presensi-auth.dart';
+import '../../presensi-in.dart';
+import '../../widgets/app_button.dart';
+
+class DashboardView extends StatefulWidget {
+  const DashboardView({this.username, Key? key, this.imagePath})
+      : super(key: key);
+
+  final String? username;
+  final String? imagePath;
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  String _latitude = "Loading...";
+
+  String _longitude = "Loading...";
+
+  bool _isMockLocation = false;
+
+  String serverResponse = "Loading...";
+
+  bool _hasFetchedData = false;
+
+  final String githubURL =
+      "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
+
+  @override
+  void initState() {
+    super.initState();
+    getLocationPermissionsAndStart();
+  }
+
+  void _launchURL() async {
+    await canLaunch(githubURL)
+        ? await launch(githubURL)
+        : throw 'Could not launch $githubURL';
+  }
+
+  Future<void> getLocationPermissionsAndStart() async {
+    await requestLocationPermission();
+    await TrustLocation.start(5);
+    await Future.delayed(
+        Duration(seconds: 5)); // Tunggu beberapa detik untuk mendapatkan lokasi
+    getLocation();
+  }
+
+  Future<void> requestLocationPermission() async {
+    PermissionStatus permission =
+        await LocationPermissions().requestPermissions();
+    print('Permissions: $permission');
+
+    if (permission != PermissionStatus.granted) {
+      showPermissionDeniedDialog();
+    }
+  }
+
+  void showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Permission Required'),
+          content: Text('Location permission is required for this app.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> getLocation() async {
+    try {
+      TrustLocation.onChange.listen((values) {
+        setState(() {
+          _latitude = values.latitude?.toString() ?? "N/A";
+          _longitude = values.longitude?.toString() ?? "N/A";
+          // _isMockLocation = values.isMockLocation ?? false;
+          print("mocklocation 1: $_isMockLocation");
+        });
+        print("mocklocation 2: $_isMockLocation");
+        if (_isMockLocation) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text('Peringatan'),
+                content:
+                    Text('Maaf, alamat Anda terdeteksi sebagai lokasi palsu.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        // Setelah mendapatkan lokasi, panggil getDataFromServer
+        getDataFromServer(widget.username!, _latitude, _longitude);
+      });
+    } on PlatformException catch (e) {
+      print('PlatformException: $e');
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  final String historiPresensiURL =
+      Constants.BASEURL + Constants.HISTORIABSENSI;
+
+  Future<List<Map<String, dynamic>>> fetchHistoriPresensiByUsername(
+      String username) async {
+    final Uri url = Uri.parse("${historiPresensiURL}?username=$username");
+    final response = await http.get(url);
+    print("url : $url");
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Failed to load histori presensi');
+    }
+  }
+
+  Future<void> getDataFromServer(
+      String username, String latitude, String longitude) async {
+    if (latitude.isEmpty || longitude.isEmpty) {
+      // Penanganan ketika latitude atau longitude kosong
+      setState(() {
+        serverResponse = "Error: Latitude or longitude is empty";
+      });
+      return;
+    }
+
+    final Uri url = Uri.parse(Constants.BASEURL +
+        Constants.CARIJARAKTERDEKAT +
+        "?username=$username&latitude=$_latitude&longitude=$_longitude");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        print("Data from server: $responseData");
+        // Tampilkan respons di dalam teks
+        setState(() {
+          serverResponse = "$responseData";
+        });
+      } else {
+        print(
+            "Failed to fetch data from server. Status code: ${response.statusCode}");
+        // Tampilkan pesan kesalahan di dalam teks
+        setState(() {
+          serverResponse =
+              "Failed to fetch data from server. Status code: ${response.statusCode}";
+        });
+      }
+    } catch (error) {
+      print("Error: $error");
+      // Tampilkan pesan kesalahan di dalam teks
+      setState(() {
+        serverResponse = "Error: $error";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    var launchURL = _launchURL;
     return SingleChildScrollView(
       child: Stack(
         children: [
@@ -31,7 +217,7 @@ class DashboardView extends StatelessWidget {
               SizedBox(
                 height: 32,
               ),
-              _InformationsComponent(),
+              _InformationsComponent(widget.username),
               SizedBox(
                 height: 40,
               ),
@@ -43,10 +229,119 @@ class DashboardView extends StatelessWidget {
               SizedBox(
                 height: 95,
               ),
+              _historyAbsensi(),
+              Text('Latitude: $_latitude'),
+              Text('Longitude: $_longitude'),
+              Text('Mock Location: $_isMockLocation'),
+              Text(
+                'respon jarak area : $serverResponse',
+                style: TextStyle(fontSize: 16),
+              ),
+              AppButton(
+                text: "LOG OUT",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                  );
+                },
+                icon: Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                color: Color(0xFFFF6161),
+              ),
+              SizedBox(
+                height: 120,
+              )
             ],
           ),
         ],
       ),
+    );
+  }
+
+  _historyAbsensi() {
+    return Column(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Histori Presensi',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            FutureBuilder(
+              future: _hasFetchedData
+                  ? null
+                  : fetchHistoriPresensiByUsername(widget.username ?? "333"),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  List<Map<String, dynamic>> historiPresensi =
+                      snapshot.data ?? [];
+                  _hasFetchedData = true;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: historiPresensi.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 3,
+                        margin:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                        child: ListTile(
+                          title: Text(
+                            'Tanggal: ${historiPresensi[index]["tanggal"]}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'Absen Masuk: ${historiPresensi[index]["absen_masuk"]}'),
+                                  Text(
+                                      'Jam Masuk: ${historiPresensi[index]["jammasuk"]}'),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'Absen Keluar: ${historiPresensi[index]["absen_keluar"]}'),
+                                  Text(
+                                      'Jam Keluar: ${historiPresensi[index]["jamkeluar"]}'),
+                                ],
+                              ),
+                            ],
+                          ),
+                          contentPadding: EdgeInsets.all(16),
+                          tileColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -217,11 +512,18 @@ class _LogoutAlertComponent extends StatelessWidget {
 }
 
 class _InformationsComponent extends StatelessWidget {
+  String? username;
+  _InformationsComponent(username);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          'Hi ' + '!',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+        ),
         Text(
           "Selamat Beraktivitas, ",
           style: semiWhiteFont.copyWith(fontSize: 14),
@@ -314,14 +616,24 @@ class _MenuActivityComponent extends StatelessWidget {
               titleMenu: "Absen Masuk",
               iconPath: 'assets/images/ic_absen_masuk.png',
               onTap: () {
-                Navigator.pushNamed(context, "CheckInScreen.routeName");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => PresensiIn(),
+                  ),
+                );
               },
             ),
             _MenuComponent(
               titleMenu: "Absen Pulang",
               iconPath: 'assets/images/ic_absen_pulang.png',
               onTap: () {
-                Navigator.pushNamed(context, "CheckOutScreen.routeName");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => PresensiAuth(),
+                  ),
+                );
               },
             ),
             _MenuComponent(
@@ -332,7 +644,7 @@ class _MenuActivityComponent extends StatelessWidget {
               },
             ),
             _MenuComponent(
-              titleMenu: "Surat Izin",
+              titleMenu: "Dinas Luar",
               iconPath: 'assets/images/ic_letter.png',
               onTap: () {
                 Navigator.pushNamed(context, "PermitLetterScreen.routeName");
