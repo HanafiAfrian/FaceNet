@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:face_net_authentication/pages/pages/dashboard_view.dart';
 import 'package:face_net_authentication/pages/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            "assets/loginand.png",
+            "assets/images/loginand.png",
             width: 200,
             height: 200,
           ),
@@ -62,8 +63,8 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
     return Timer(duration, () async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       bool login = preferences.getBool("login") ?? false;
-      String? nip = preferences.getString("nip")?? "333";
-      String? path = preferences.getString("path")??"";
+      String? nip = preferences.getString("nip") ?? "333";
+      String? path = preferences.getString("path") ?? "";
       if (login) {
         //untuk perpindahan halaman
         Navigator.pushReplacement(
@@ -75,13 +76,8 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
                     )));
       } else {
         //untuk perpindahan halaman
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Profile(
-                      nip!,
-                      imagePath: path!,
-                    )));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => DashboardView()));
       }
     });
   }

@@ -83,11 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Image(image: AssetImage('assets/loginand.png')),
+                      Image(image: AssetImage('assets/images/loginand.png')),
                       Padding(
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
                         child: Image(
-                          image: AssetImage('assets/presensian.png'),
+                          image: AssetImage('assets/images/presensian.png'),
                           width: 300,
                         ),
                       ),

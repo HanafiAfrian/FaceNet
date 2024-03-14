@@ -219,7 +219,7 @@ class _ProfileState extends State<Profile> {
                         fit: BoxFit.cover,
                         image: widget.imagePath != null
                             ? FileImage(File(widget.imagePath) as File)
-                            : AssetImage('assets/presensian.png')
+                            : AssetImage('assets/images/presensian.png')
                                 as ImageProvider<Object>,
                       ),
                     ),
