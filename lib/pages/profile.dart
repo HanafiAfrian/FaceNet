@@ -109,7 +109,7 @@ class _ProfileState extends State<Profile> {
         setState(() {
           _latitude = values.latitude?.toString() ?? "N/A";
           _longitude = values.longitude?.toString() ?? "N/A";
-          _isMockLocation = values.isMockLocation ?? false;
+          // _isMockLocation = values.isMockLocation ?? false;
           print("mocklocation 1: $_isMockLocation");
         });
         print("mocklocation 2: $_isMockLocation");
@@ -217,7 +217,10 @@ class _ProfileState extends State<Profile> {
                       color: Colors.black,
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: FileImage(File(widget.imagePath)),
+                        image: widget.imagePath != null
+                            ? FileImage(File(widget.imagePath) as File)
+                            : AssetImage('assets/presensian.png')
+                                as ImageProvider<Object>,
                       ),
                     ),
                     margin: EdgeInsets.all(20),
@@ -449,6 +452,94 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                     Divider(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: InkWell(
+                            onTap: launchURL,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.yellow,
+                                boxShadow: <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    blurRadius: 1,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 16),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          PresensiDinasluar(),
+                                    ),
+                                  );
+                                },
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.warning_amber_outlined,
+                                      size: 30,
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Dinas Luar',
+                                      style: TextStyle(fontSize: 16),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: InkWell(
+                            onTap: _launchURL,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.red,
+                                boxShadow: <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    blurRadius: 1,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 16),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.warning_amber_outlined,
+                                    size: 30,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Bantuan',
+                                    style: TextStyle(fontSize: 16),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [

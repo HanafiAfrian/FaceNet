@@ -62,8 +62,8 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
     return Timer(duration, () async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       bool login = preferences.getBool("login") ?? false;
-      String? nip = preferences.getString("nip");
-      String? path = preferences.getString("path");
+      String? nip = preferences.getString("nip")?? "333";
+      String? path = preferences.getString("path")??"";
       if (login) {
         //untuk perpindahan halaman
         Navigator.pushReplacement(
@@ -76,7 +76,12 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       } else {
         //untuk perpindahan halaman
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => MyHomePage()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => Profile(
+                      nip!,
+                      imagePath: path!,
+                    )));
       }
     });
   }
