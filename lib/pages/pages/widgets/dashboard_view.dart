@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/colors.dart';
-import '../../constants/fonts.dart';
-import '../../constants/sizes.dart';
-import '../../utils/alert_utils.dart';
+import '../../../constants/colors.dart';
+import '../../../constants/fonts.dart';
+import '../../../constants/sizes.dart';
+import '../../../utils/alert_utils.dart';
 
 class DashboardView extends StatelessWidget {
   @override
@@ -33,7 +33,7 @@ class DashboardView extends StatelessWidget {
               ),
               _InformationsComponent(),
               SizedBox(
-                height: 20,
+                height: 40,
               ),
               _MenuActivityComponent(),
               SizedBox(
@@ -65,7 +65,7 @@ class _HeaderDashboardComponent extends StatelessWidget {
           margin: EdgeInsets.only(right: 14),
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/secondary_logo.png'),
+              image: AssetImage('assets/images/logo.png'),
             ),
           ),
         ),
@@ -74,7 +74,7 @@ class _HeaderDashboardComponent extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "GoAbsensi",
+              "Presensian",
               style: boldWhiteFont.copyWith(fontSize: 22),
             ),
             Text(
@@ -439,7 +439,7 @@ class _AnnouncementComponent extends StatelessWidget {
                     height: 2,
                   ),
                   Text(
-                    "Absensi menggunakan aplikasi GoAbsensi",
+                    "Absensi menggunakan aplikasi Presensian",
                     style: semiBlackFont.copyWith(
                       fontSize: 11.5,
                       color: Color(0xFFEEEEEE),

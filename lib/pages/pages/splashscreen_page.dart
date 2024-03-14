@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:face_net_authentication/pages/pages/dashboard_view.dart';
+import 'package:face_net_authentication/pages/pages/widgets/dashboard_view.dart';
 import 'package:face_net_authentication/pages/profile.dart';
 import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../home.dart';
+import '../main_screen.dart';
 
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({Key? key}) : super(key: key);
@@ -77,7 +78,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       } else {
         //untuk perpindahan halaman
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => DashboardView()));
+            context, MaterialPageRoute(builder: (context) => MainScreen()));
       }
     });
   }
