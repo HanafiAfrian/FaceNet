@@ -9,4 +9,5 @@ class Constants {
   static String ABSENSIKELUAR = "absensikeluar.php";
   static String ABSENSIMASUK = "absensimasuk.php";
   static String CARIJARAKTERDEKAT = "mencarijarakterdekat.php";
+   static String UPLOADDINAS = "uploaddinas.php";
 }

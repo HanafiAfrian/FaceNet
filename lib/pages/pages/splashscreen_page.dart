@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:face_net_authentication/pages/pages/dinasluar.dart';
 import 'package:face_net_authentication/pages/pages/widgets/dashboard_view.dart';
 import 'package:face_net_authentication/pages/profile.dart';
 import 'package:flutter/material.dart';
@@ -68,17 +69,20 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       String? path = preferences.getString("path") ?? "";
       if (login) {
         //untuk perpindahan halaman
+        // Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => Profile(
+        //               nip!,
+        //               imagePath: path!,
+        //             )));
+
         Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Profile(
-                      nip!,
-                      imagePath: path!,
-                    )));
+            context, MaterialPageRoute(builder: (context) => DinasLuarPage()));
       } else {
         //untuk perpindahan halaman
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => MainScreen()));
+            context, MaterialPageRoute(builder: (context) => DinasLuarPage()));
       }
     });
   }
