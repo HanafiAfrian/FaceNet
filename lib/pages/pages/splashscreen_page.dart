@@ -78,11 +78,11 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
         //             )));
 
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => DinasLuarPage()));
+            context, MaterialPageRoute(builder: (context) => MainScreen()));
       } else {
         //untuk perpindahan halaman
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => DinasLuarPage()));
+            context, MaterialPageRoute(builder: (context) => MainScreen()));
       }
     });
   }

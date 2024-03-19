@@ -18,6 +18,7 @@ import 'package:http/http.dart' as http;
 import '../../presensi-auth.dart';
 import '../../presensi-in.dart';
 import '../../widgets/app_button.dart';
+import '../dinasluar.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({this.username, Key? key, this.imagePath})
@@ -647,7 +648,8 @@ class _MenuActivityComponent extends StatelessWidget {
               titleMenu: "Dinas Luar",
               iconPath: 'assets/images/ic_letter.png',
               onTap: () {
-                Navigator.pushNamed(context, "PermitLetterScreen.routeName");
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => DinasLuarPage()));
               },
             ),
           ],

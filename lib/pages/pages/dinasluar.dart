@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +11,21 @@ import 'package:image_picker/image_picker.dart';
 class DinasLuarPage extends StatefulWidget {
   @override
   _DinasLuarPageState createState() => _DinasLuarPageState();
+}
+
+void main() {
+  // Add this line before making the network request
+  HttpOverrides.global = MyHttpOverrides();
+  // ...
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 }
 
 class _DinasLuarPageState extends State<DinasLuarPage> {
@@ -41,41 +57,85 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
     }
   }
 
-  Future<void> _uploadDocument() async {
+  _uploadDocument() async {
+    final serverTime = DateTime.now().toString();
+    setState(() {
+      _serverTime = serverTime;
+    });
     if (_pdfFile != null && _imageFile != null) {
       // Simulate backend request to get server time
       // Replace this with your actual backend call to get server time
-      await Future.delayed(Duration(seconds: 2));
-      final serverTime = DateTime.now().toString();
-      setState(() {
-        _serverTime = serverTime;
-      });
+      // await Future.delayed(Duration(seconds: 2));
 
-      var url = Uri.parse(Constants.BASEURL + Constants.UPLOADDINAS);
-      var request = http.MultipartRequest('POST', url)
-        ..fields['no_tugas'] = _taskNumber
-        ..fields['nip'] = _nip
-        ..fields['waktu'] = _serverTime
-        ..files.add(http.MultipartFile(
-          'pdf_document',
-          _pdfFile!.readAsBytes().asStream(),
-          _pdfFile!.lengthSync(),
-          filename: _pdfFile!.path.split('/').last,
-        ))
-        ..files.add(http.MultipartFile(
-          'image_document',
-          _imageFile!.readAsBytes().asStream(),
-          _imageFile!.lengthSync(),
-          filename: _imageFile!.path.split('/').last,
-        ));
+      // var url = Uri.parse(Constants.BASEURL + Constants.UPLOADDINAS);
+      // var request = http.MultipartRequest('POST', url)
+      //   ..fields['no_tugas'] = _taskNumber
+      //   ..fields['nip'] = _nip
+      //   ..fields['waktu'] = _serverTime
+      //   ..files.add(http.MultipartFile(
+      //     'pdf_document',
+      //     _pdfFile!.readAsBytes().asStream(),
+      //     _pdfFile!.lengthSync(),
+      //     filename: _pdfFile!.path.split('/').last,
+      //   ))
+      //   ..files.add(http.MultipartFile(
+      //     'image_document',
+      //     _imageFile!.readAsBytes().asStream(),
+      //     _imageFile!.lengthSync(),
+      //     filename: _imageFile!.path.split('/').last,
+      //   ));
 
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        // File successfully uploaded
-        print('Document uploaded successfully');
-      } else {
-        // Error uploading file
-        print('Failed to upload document');
+      // var response = await request.send();
+      // if (response.statusCode == 200) {
+      //   // File successfully uploaded
+      //   print('Document uploaded successfully');
+      // } else {
+      //   // Error uploading file
+      //   print('Failed to upload document');
+      // }
+
+      try {
+        var url = Uri.parse(Constants.BASEURL + Constants.UPLOADDINAS);
+        var request = http.MultipartRequest('POST', url)
+          ..fields['no_tugas'] = _taskNumber
+          ..fields['nip'] = _nip
+          ..fields['waktu'] = _serverTime
+          ..files.add(http.MultipartFile(
+            'pdf_document',
+            _pdfFile!.readAsBytes().asStream(),
+            _pdfFile!.lengthSync(),
+            filename: _pdfFile!.path.split('/').last,
+          ))
+          ..files.add(http.MultipartFile(
+            'image_document',
+            _imageFile!.readAsBytes().asStream(),
+            _imageFile!.lengthSync(),
+            filename: _imageFile!.path.split('/').last,
+          ));
+        // Tambahkan data atau file yang ingin diunggah
+        // request.files.add(http.MultipartFile.fromBytes('file', await File('path/to/file').readAsBytes(), filename: 'filename.jpg'));
+
+        final response = await request
+            .send()
+            .timeout(Duration(seconds: 90)); // Atur waktu habis (timeout)
+
+        if (response.statusCode == 200) {
+          // Tanggapi respons jika berhasil
+          print('Data berhasil diunggah');
+          Navigator.pop(context);
+        } else {
+          // Tanggapi kesalahan jika ada
+          print('Gagal mengunggah data. Kode status: ${response.statusCode}');
+        }
+      } on SocketException catch (e) {
+        // Tangani kesalahan koneksi
+        print('Terjadi kesalahan koneksi: $e');
+      } on TimeoutException catch (e) {
+        // Tangani kesalahan waktu habis (timeout)
+        print('Waktu habis saat mengirim permintaan: $e');
+      } catch (e) {
+        // Tangani kesalahan umum
+        print('Terjadi kesalahan: $e');
       }
     } else {
       // No PDF file or image selected
