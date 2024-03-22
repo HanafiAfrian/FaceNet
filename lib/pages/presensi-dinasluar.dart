@@ -12,6 +12,8 @@ import 'package:face_net_authentication/services/face_detector_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+import 'pages/dinasluar.dart';
+
 class PresensiDinasluar extends StatefulWidget {
   const PresensiDinasluar({Key? key}) : super(key: key);
 
@@ -108,6 +110,10 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
       User? user = await _mlService.predict();
       var bottomSheetController = scaffoldKey.currentState!
           .showBottomSheet((context) => presensiDinasluarSheet(user: user));
+      // print("user" + user!.nip);
+      // print(
+      //   "camerapath" + _cameraService.imagePath!,
+      // );
       bottomSheetController.closed.whenComplete(_reload);
     }
   }
@@ -146,5 +152,8 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
             style: TextStyle(fontSize: 20),
           ),
         )
-      : PresensiDinasluarSheet(user: user);
+      : DinasLuarPage(
+          user: user,
+          imagepath: _cameraService.imagePath!,
+        );
 }

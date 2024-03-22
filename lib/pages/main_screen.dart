@@ -7,6 +7,9 @@ import 'pages/widgets/dashboard_view.dart';
 import 'pages/widgets/presence_view.dart';
 
 class MainScreen extends StatefulWidget {
+  final String? username;
+  final String? imagePath;
+  const MainScreen({Key? key, this.username, this.imagePath}) : super(key: key);
   @override
   _MainScreenState createState() => _MainScreenState();
 }

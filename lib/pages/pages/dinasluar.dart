@@ -8,7 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
+import '../models/user.model.dart';
+
 class DinasLuarPage extends StatefulWidget {
+  DinasLuarPage({Key? key, required this.user, this.imagepath})
+      : super(key: key);
+  final User user;
+  String? imagepath;
+
   @override
   _DinasLuarPageState createState() => _DinasLuarPageState();
 }

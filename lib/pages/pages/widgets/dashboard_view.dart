@@ -16,6 +16,7 @@ import '../../../utils/alert_utils.dart';
 import 'package:http/http.dart' as http;
 
 import '../../presensi-auth.dart';
+import '../../presensi-dinasluar.dart';
 import '../../presensi-in.dart';
 import '../../widgets/app_button.dart';
 import '../dinasluar.dart';
@@ -38,7 +39,8 @@ class _DashboardViewState extends State<DashboardView> {
   bool _isMockLocation = false;
 
   String serverResponse = "Loading...";
-
+  bool _isAbsenmasuk = true;
+  bool _isAbsenpulang = true;
   bool _hasFetchedData = false;
 
   final String githubURL =
@@ -48,6 +50,48 @@ class _DashboardViewState extends State<DashboardView> {
   void initState() {
     super.initState();
     getLocationPermissionsAndStart();
+    checkAbesnmasuk();
+    checkAbesnpulang();
+  }
+
+  Future<void> checkAbesnmasuk() async {
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.CEKABSENMASUK),
+        body: {'username': widget.username},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _isAbsenmasuk = data as bool;
+        });
+      } else {
+        print('Failed to load attendance data');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
+  Future<void> checkAbesnpulang() async {
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.CEKABSENPULANG),
+        body: {'username': widget.username},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _isAbsenpulang = data as bool;
+        });
+      } else {
+        print('Failed to load attendance data');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
   }
 
   void _launchURL() async {
@@ -648,8 +692,10 @@ class _MenuActivityComponent extends StatelessWidget {
               titleMenu: "Dinas Luar",
               iconPath: 'assets/images/ic_letter.png',
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => DinasLuarPage()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PresensiDinasluar()));
               },
             ),
           ],

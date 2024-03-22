@@ -41,7 +41,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       TextEditingController(text: '');
   final TextEditingController _passwordTextEditingController =
       TextEditingController(text: '');
-
+  String selectedRole = 'Tendik'; // Default role selection
   User? predictedUser;
 
   Future _signUp(context) async {
@@ -69,12 +69,12 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     );
 
     // Mengirim data ke server setelah menghapus data prediksi
-    await _sendDataToServer(
-        nip, user, password, predictedData, _cameraService.imagePath);
+    await _sendDataToServer(nip, user, password, selectedRole, predictedData,
+        _cameraService.imagePath);
   }
 
   Future<void> _sendDataToServer(String nip, String user, String password,
-      List predictedData, String? imagePath) async {
+      String selectedRole, List predictedData, String? imagePath) async {
     var request = http.MultipartRequest(
       'POST',
       Uri.parse(Constants.BASEURL + Constants.REGISTER),
@@ -83,6 +83,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     request.fields['nip'] = nip;
     request.fields['user'] = user;
     request.fields['password'] = password;
+    request.fields['role'] = selectedRole;
     request.fields['modelData'] = predictedData.toString();
     request.files.add(
       await http.MultipartFile.fromPath(
@@ -386,6 +387,21 @@ class _AuthActionButtonState extends State<AuthActionButton> {
                       )
                     : Container(),
                 SizedBox(height: 10),
+                DropdownButton<String>(
+                  value: selectedRole,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedRole = newValue!;
+                    });
+                  },
+                  items: <String>['Tendik', 'Dosen']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
                 SizedBox(height: 10),
                 !widget.isLogin
                     ? AppTextField(

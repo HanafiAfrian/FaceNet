@@ -1,4 +1,5 @@
 import 'package:face_net_authentication/locator.dart';
+import 'package:face_net_authentication/pages/main_screen.dart';
 import 'package:face_net_authentication/pages/models/user.model.dart';
 import 'package:face_net_authentication/pages/profile.dart';
 import 'package:face_net_authentication/pages/widgets/app_button.dart';
@@ -23,8 +24,8 @@ class SignInSheet extends StatelessWidget {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (BuildContext context) => Profile(
-                    user.nip,
+              builder: (BuildContext context) => MainScreen(
+                    username: user.nip,
                     imagePath: _cameraService.imagePath!,
                   )));
     } else {

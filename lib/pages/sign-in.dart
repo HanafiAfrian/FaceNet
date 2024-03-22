@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:face_net_authentication/locator.dart';
 import 'package:face_net_authentication/pages/models/user.model.dart';
 import 'package:face_net_authentication/pages/widgets/auth_button.dart';
@@ -66,6 +67,8 @@ class SignInState extends State<SignIn> {
     await _faceDetectorService.detectFacesFromImage(image!);
     if (_faceDetectorService.faceDetected) {
       _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
+      // Panggil takePictureAutomatically() setiap kali wajah terdeteksi.
+      await takePictureAutomatically();
     }
     if (mounted) setState(() {});
   }
@@ -98,6 +101,23 @@ class SignInState extends State<SignIn> {
       var bottomSheetController = scaffoldKey.currentState!
           .showBottomSheet((context) => signInSheet(user: user));
       bottomSheetController.closed.whenComplete(_reload);
+    }
+  }
+
+  Future<void> takePictureAutomatically() async {
+    if (_faceDetectorService.faceDetected) {
+      await takePicture();
+      User? user = await _mlService.predict();
+      if (user != null) {
+        var bottomSheetController = scaffoldKey.currentState!
+            .showBottomSheet((context) => signInSheet(user: user));
+        bottomSheetController.closed.whenComplete(_reload);
+      } else {
+        showDialog(
+            context: context,
+            builder: (context) =>
+                AlertDialog(content: Text('Unauthorized User!')));
+      }
     }
   }
 
