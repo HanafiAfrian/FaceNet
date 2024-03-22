@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart';
 import '../../constants/constants.dart';
 import '../home.dart';
+import '../main_screen.dart';
 import 'app_text_field.dart';
 import 'package:http/http.dart' as http;
 
@@ -136,9 +137,9 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (BuildContext context) => Profile(
-                    this.predictedUser!.user,
-                    imagePath: _cameraService.imagePath!,
+              builder: (BuildContext context) => MainScreen(
+                    imagePath: this.predictedUser!.user,
+                    username: _cameraService.imagePath!,
                   )));
     } else {
       showDialog(
@@ -158,9 +159,9 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (BuildContext context) => Profile(
-                    this.predictedUser!.user,
-                    imagePath: _cameraService.imagePath!,
+              builder: (BuildContext context) => MainScreen(
+                    imagePath: this.predictedUser!.user,
+                    username: _cameraService.imagePath!,
                   )));
     } else {
       showDialog(
@@ -180,9 +181,9 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (BuildContext context) => Profile(
-                    this.predictedUser!.user,
-                    imagePath: _cameraService.imagePath!,
+              builder: (BuildContext context) => MainScreen(
+                    imagePath: this.predictedUser!.user,
+                    username: _cameraService.imagePath!,
                   )));
     } else {
       showDialog(
@@ -202,9 +203,9 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (BuildContext context) => Profile(
-                    this.predictedUser!.user,
-                    imagePath: _cameraService.imagePath!,
+              builder: (BuildContext context) => MainScreen(
+                    imagePath: this.predictedUser!.user,
+                    username: _cameraService.imagePath!,
                   )));
     } else {
       showDialog(

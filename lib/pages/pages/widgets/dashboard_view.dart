@@ -39,8 +39,8 @@ class _DashboardViewState extends State<DashboardView> {
   bool _isMockLocation = false;
 
   String serverResponse = "Loading...";
-  bool _isAbsenmasuk = true;
-  bool _isAbsenpulang = true;
+  bool isAbsenmasuk = true;
+  bool isAbsenpulang = true;
   bool _hasFetchedData = false;
 
   final String githubURL =
@@ -64,7 +64,7 @@ class _DashboardViewState extends State<DashboardView> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _isAbsenmasuk = data as bool;
+          isAbsenmasuk = data as bool;
         });
       } else {
         print('Failed to load attendance data');
@@ -84,7 +84,7 @@ class _DashboardViewState extends State<DashboardView> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          _isAbsenpulang = data as bool;
+          isAbsenpulang = data as bool;
         });
       } else {
         print('Failed to load attendance data');
@@ -266,7 +266,8 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 40,
               ),
-              _MenuActivityComponent(),
+              _MenuActivityComponent(
+                  serverResponse, isAbsenmasuk, isAbsenpulang),
               SizedBox(
                 height: 20,
               ),
@@ -641,6 +642,11 @@ class _PresenceInfoComponent extends StatelessWidget {
 }
 
 class _MenuActivityComponent extends StatelessWidget {
+  _MenuActivityComponent(serverResponse, isAbsenmasuk, isAbsenpulang);
+
+  String? serverResponse;
+  bool? isAbsenmasuk, isAbsenpulang;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -661,24 +667,66 @@ class _MenuActivityComponent extends StatelessWidget {
               titleMenu: "Absen Masuk",
               iconPath: 'assets/images/ic_absen_masuk.png',
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => PresensiIn(),
-                  ),
-                );
+                if (serverResponse == 'false' || isAbsenmasuk!) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Peringatan"),
+                        content: Text(
+                            "Anda tidak dapat melakukan absen masuk saat ini."),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text("OK"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => PresensiIn(),
+                    ),
+                  );
+                }
               },
             ),
             _MenuComponent(
               titleMenu: "Absen Pulang",
               iconPath: 'assets/images/ic_absen_pulang.png',
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => PresensiAuth(),
-                  ),
-                );
+                if (serverResponse == 'false' || isAbsenpulang == false) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Peringatan"),
+                        content: Text(
+                            "Anda tidak dapat melakukan absen Pulang saat ini."),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text("OK"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => PresensiAuth(),
+                    ),
+                  );
+                }
               },
             ),
             _MenuComponent(

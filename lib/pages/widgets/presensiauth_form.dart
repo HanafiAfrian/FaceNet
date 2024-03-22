@@ -13,6 +13,8 @@ import 'package:flutter/services.dart';
 import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
+import '../main_screen.dart';
+
 class PresensiAuthSheet extends StatefulWidget {
   PresensiAuthSheet({Key? key, required this.user}) : super(key: key);
   final User user;
@@ -114,7 +116,7 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
     } else if (user.password == _passwordController.text) {
       try {
         final response = await http.post(
-          Uri.parse(Constants.BASEURL+Constants.ABSENSIKELUAR),
+          Uri.parse(Constants.BASEURL + Constants.ABSENSIKELUAR),
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
@@ -140,14 +142,12 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
             );
           } else if (trimmedResponse == 'true') {
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => Profile(
-                  user.nip,
-                  imagePath: _cameraService.imagePath!,
-                ),
-              ),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => MainScreen(
+                          imagePath: _cameraService.imagePath,
+                          username: user.nip,
+                        )));
           } else {
             showDialog(
               context: context,

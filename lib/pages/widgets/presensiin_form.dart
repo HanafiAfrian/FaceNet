@@ -13,6 +13,7 @@ import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
 import '../../constants/constants.dart';
+import '../main_screen.dart';
 
 class PresensiInSheet extends StatefulWidget {
   PresensiInSheet({Key? key, required this.user}) : super(key: key);
@@ -143,12 +144,10 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (BuildContext context) => Profile(
-                  user.nip,
-                  imagePath: _cameraService.imagePath!,
-                ),
-              ),
-            );
+                builder: (BuildContext context) => MainScreen(
+                          imagePath: _cameraService.imagePath,
+                          username: user.nip,
+                        )));
           } else {
             showDialog(
               context: context,
