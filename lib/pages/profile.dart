@@ -12,7 +12,7 @@ import 'package:face_net_authentication/pages/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'package:trust_location/trust_location.dart';
+// import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -67,7 +67,7 @@ class _ProfileState extends State<Profile> {
 
   Future<void> getLocationPermissionsAndStart() async {
     await requestLocationPermission();
-    await TrustLocation.start(5);
+    // await TrustLocation.start(5);
     await Future.delayed(
         Duration(seconds: 5)); // Tunggu beberapa detik untuk mendapatkan lokasi
     getLocation();
@@ -104,43 +104,43 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> getLocation() async {
-    try {
-      TrustLocation.onChange.listen((values) {
-        setState(() {
-          _latitude = values.latitude?.toString() ?? "N/A";
-          _longitude = values.longitude?.toString() ?? "N/A";
-          // _isMockLocation = values.isMockLocation ?? false;
-          print("mocklocation 1: $_isMockLocation");
-        });
-        print("mocklocation 2: $_isMockLocation");
-        if (_isMockLocation) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Peringatan'),
-                content:
-                    Text('Maaf, alamat Anda terdeteksi sebagai lokasi palsu.'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-        // Setelah mendapatkan lokasi, panggil getDataFromServer
-        getDataFromServer(widget.username, _latitude, _longitude);
-      });
-    } on PlatformException catch (e) {
-      print('PlatformException: $e');
-    } catch (e) {
-      print('Error: $e');
-    }
+    // try {
+    //   TrustLocation.onChange.listen((values) {
+    //     setState(() {
+    //       _latitude = values.latitude?.toString() ?? "N/A";
+    //       _longitude = values.longitude?.toString() ?? "N/A";
+    //       // _isMockLocation = values.isMockLocation ?? false;
+    //       print("mocklocation 1: $_isMockLocation");
+    //     });
+    //     print("mocklocation 2: $_isMockLocation");
+    //     if (_isMockLocation) {
+    //       showDialog(
+    //         context: context,
+    //         builder: (context) {
+    //           return AlertDialog(
+    //             title: Text('Peringatan'),
+    //             content:
+    //                 Text('Maaf, alamat Anda terdeteksi sebagai lokasi palsu.'),
+    //             actions: <Widget>[
+    //               TextButton(
+    //                 onPressed: () {
+    //                   Navigator.of(context).pop();
+    //                 },
+    //                 child: Text('OK'),
+    //               ),
+    //             ],
+    //           );
+    //         },
+    //       );
+    //     }
+    //     // Setelah mendapatkan lokasi, panggil getDataFromServer
+    //     getDataFromServer(widget.username, _latitude, _longitude);
+    //   });
+    // } on PlatformException catch (e) {
+    //   print('PlatformException: $e');
+    // } catch (e) {
+    //   print('Error: $e');
+    // }
   }
 
   final String historiPresensiURL =

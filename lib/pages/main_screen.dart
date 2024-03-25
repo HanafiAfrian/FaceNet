@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
@@ -18,10 +19,14 @@ class _MainScreenState extends State<MainScreen> {
   int? bottomNavBarIndex;
   PageController? pageController;
 
+  String? nip;
+
+  String? path;
+
   @override
   void initState() {
     super.initState();
-
+   
     bottomNavBarIndex = 0;
     pageController = PageController(initialPage: bottomNavBarIndex!);
   }
@@ -50,7 +55,10 @@ class _MainScreenState extends State<MainScreen> {
                     });
                   },
                   children: [
-                    DashboardView(username: "333"),
+                    DashboardView(
+                      username: nip,
+                      imagePath: path,
+                    ),
                     PresenceView(),
                   ],
                 ),
@@ -127,4 +135,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+
+ 
 }

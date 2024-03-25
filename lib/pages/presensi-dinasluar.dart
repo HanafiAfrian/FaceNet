@@ -153,7 +153,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
           ),
         )
       : DinasLuarPage(
-          user: user,
+          // user: user,
           imagepath: _cameraService.imagePath!,
         );
 }

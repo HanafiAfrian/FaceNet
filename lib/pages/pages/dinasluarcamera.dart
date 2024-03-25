@@ -10,14 +10,14 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/user.model.dart';
 
-class DinasLuarPage extends StatefulWidget {
-  DinasLuarPage({Key? key,   this.imagepath})
+class DinasLuarCameraPage extends StatefulWidget {
+  DinasLuarCameraPage({Key? key, required this.user, this.imagepath})
       : super(key: key);
-  
+  final User user;
   String? imagepath;
 
   @override
-  _DinasLuarPageState createState() => _DinasLuarPageState();
+  _DinasLuarCameraPageState createState() => _DinasLuarCameraPageState();
 }
 
 void main() {
@@ -35,7 +35,7 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-class _DinasLuarPageState extends State<DinasLuarPage> {
+class _DinasLuarCameraPageState extends State<DinasLuarCameraPage> {
   File? _pdfFile;
   File? _imageFile;
   String _taskNumber = '';
@@ -152,6 +152,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
     _takePicture();
   }

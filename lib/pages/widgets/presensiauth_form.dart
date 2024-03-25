@@ -10,7 +10,7 @@ import 'package:face_net_authentication/pages/widgets/app_text_field.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:trust_location/trust_location.dart';
+// import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
 import '../main_screen.dart';
@@ -35,12 +35,12 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
   @override
   void initState() {
     super.initState();
-    getLocationPermissionsAndStart();
+    // getLocationPermissionsAndStart();
   }
 
   Future<void> getLocationPermissionsAndStart() async {
     await requestLocationPermission();
-    TrustLocation.start(5);
+    // TrustLocation.start(5);
     getLocation();
   }
 
@@ -75,23 +75,23 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
   }
 
   Future<void> getLocation() async {
-    try {
-      TrustLocation.onChange.listen((values) {
-        setState(() {
-          _latitude = values.latitude?.toString() ?? "N/A";
-          _longitude = values.longitude?.toString() ?? "N/A";
-          _isMockLocation = values.isMockLocation ?? false;
-          _currentLocation = LatLng(
-            double.tryParse(_latitude) ?? 0.0,
-            double.tryParse(_longitude) ?? 0.0,
-          );
-        });
-      });
-    } on PlatformException catch (e) {
-      print('PlatformException: $e');
-    } catch (e) {
-      print('Error: $e');
-    }
+    // try {
+    //   TrustLocation.onChange.listen((values) {
+    //     setState(() {
+    //       _latitude = values.latitude?.toString() ?? "N/A";
+    //       _longitude = values.longitude?.toString() ?? "N/A";
+    //       _isMockLocation = values.isMockLocation ?? false;
+    //       _currentLocation = LatLng(
+    //         double.tryParse(_latitude) ?? 0.0,
+    //         double.tryParse(_longitude) ?? 0.0,
+    //       );
+    //     });
+    //   });
+    // } on PlatformException catch (e) {
+    //   print('PlatformException: $e');
+    // } catch (e) {
+    //   print('Error: $e');
+    // }
   }
 
   Future<void> _presensiAuth(BuildContext context, User user) async {

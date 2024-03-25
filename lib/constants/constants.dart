@@ -1,7 +1,7 @@
 class Constants {
   static String githubURL =
       "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
-  static String BASEURL = "http://192.168.20.223/presensi/";
+  static String BASEURL = "http://10.96.4.40/presensi/";
   static String REGISTER = "register.php";
   static String HISTORIABSENSI = "historiabsensi.php";
   static String ABSENSI = "absensi.php";
@@ -10,6 +10,6 @@ class Constants {
   static String ABSENSIMASUK = "absensimasuk.php";
   static String CARIJARAKTERDEKAT = "mencarijarakterdekat.php";
   static String UPLOADDINAS = "uploaddinas.php";
-  static String CEKABSENMASUK ="cek-absenmasuk.php";
-  static String CEKABSENPULANG ="cek-absenpulang.php";
+  static String CEKABSENMASUK = "cek-absenmasuk.php";
+  static String CEKABSENPULANG = "cek-absenpulang.php";
 }

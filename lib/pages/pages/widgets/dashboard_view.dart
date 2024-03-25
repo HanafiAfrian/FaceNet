@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:detect_fake_location/detect_fake_location.dart';
 import 'package:face_net_authentication/pages/home.dart';
 import 'package:face_net_authentication/pages/pages/presensi-in.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:location_permissions/location_permissions.dart';
-import 'package:trust_location/trust_location.dart';
+import 'package:geolocator/geolocator.dart' as geoloc;
+import 'package:permission_handler/permission_handler.dart' as perhandler;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:location/location.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/fonts.dart';
@@ -22,160 +25,38 @@ import '../../widgets/app_button.dart';
 import '../dinasluar.dart';
 
 class DashboardView extends StatefulWidget {
-  const DashboardView({this.username, Key? key, this.imagePath})
-      : super(key: key);
+  DashboardView({this.username, Key? key, this.imagePath}) : super(key: key);
 
-  final String? username;
-  final String? imagePath;
+  String? username;
+  String? imagePath;
   @override
   State<DashboardView> createState() => _DashboardViewState();
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  String _latitude = "Loading...";
-
-  String _longitude = "Loading...";
-
-  bool _isMockLocation = false;
-
-  String serverResponse = "Loading...";
-  bool isAbsenmasuk = true;
-  bool isAbsenpulang = true;
   bool _hasFetchedData = false;
-
   final String githubURL =
       "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
-
+  String? usernamee;
   @override
   void initState() {
     super.initState();
-    getLocationPermissionsAndStart();
-    checkAbesnmasuk();
-    checkAbesnpulang();
+    getPref();
   }
 
-  Future<void> checkAbesnmasuk() async {
-    try {
-      final response = await http.post(
-        Uri.parse(Constants.BASEURL + Constants.CEKABSENMASUK),
-        body: {'username': widget.username},
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          isAbsenmasuk = data as bool;
-        });
-      } else {
-        print('Failed to load attendance data');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
-  }
-
-  Future<void> checkAbesnpulang() async {
-    try {
-      final response = await http.post(
-        Uri.parse(Constants.BASEURL + Constants.CEKABSENPULANG),
-        body: {'username': widget.username},
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          isAbsenpulang = data as bool;
-        });
-      } else {
-        print('Failed to load attendance data');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
+  getPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      usernamee = preferences.getString("nip");
+      widget.imagePath = preferences.getString("path");
+    });
+    print("usernameanda: ${usernamee}");
   }
 
   void _launchURL() async {
     await canLaunch(githubURL)
         ? await launch(githubURL)
         : throw 'Could not launch $githubURL';
-  }
-
-  Future<void> getLocationPermissionsAndStart() async {
-    await requestLocationPermission();
-    await TrustLocation.start(5);
-    await Future.delayed(
-        Duration(seconds: 5)); // Tunggu beberapa detik untuk mendapatkan lokasi
-    getLocation();
-  }
-
-  Future<void> requestLocationPermission() async {
-    PermissionStatus permission =
-        await LocationPermissions().requestPermissions();
-    print('Permissions: $permission');
-
-    if (permission != PermissionStatus.granted) {
-      showPermissionDeniedDialog();
-    }
-  }
-
-  void showPermissionDeniedDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Permission Required'),
-          content: Text('Location permission is required for this app.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> getLocation() async {
-    try {
-      TrustLocation.onChange.listen((values) {
-        setState(() {
-          _latitude = values.latitude?.toString() ?? "N/A";
-          _longitude = values.longitude?.toString() ?? "N/A";
-          // _isMockLocation = values.isMockLocation ?? false;
-          print("mocklocation 1: $_isMockLocation");
-        });
-        print("mocklocation 2: $_isMockLocation");
-        if (_isMockLocation) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Peringatan'),
-                content:
-                    Text('Maaf, alamat Anda terdeteksi sebagai lokasi palsu.'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-        // Setelah mendapatkan lokasi, panggil getDataFromServer
-        getDataFromServer(widget.username!, _latitude, _longitude);
-      });
-    } on PlatformException catch (e) {
-      print('PlatformException: $e');
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   final String historiPresensiURL =
@@ -191,48 +72,6 @@ class _DashboardViewState extends State<DashboardView> {
       return List<Map<String, dynamic>>.from(data);
     } else {
       throw Exception('Failed to load histori presensi');
-    }
-  }
-
-  Future<void> getDataFromServer(
-      String username, String latitude, String longitude) async {
-    if (latitude.isEmpty || longitude.isEmpty) {
-      // Penanganan ketika latitude atau longitude kosong
-      setState(() {
-        serverResponse = "Error: Latitude or longitude is empty";
-      });
-      return;
-    }
-
-    final Uri url = Uri.parse(Constants.BASEURL +
-        Constants.CARIJARAKTERDEKAT +
-        "?username=$username&latitude=$_latitude&longitude=$_longitude");
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        var responseData = json.decode(response.body);
-        print("Data from server: $responseData");
-        // Tampilkan respons di dalam teks
-        setState(() {
-          serverResponse = "$responseData";
-        });
-      } else {
-        print(
-            "Failed to fetch data from server. Status code: ${response.statusCode}");
-        // Tampilkan pesan kesalahan di dalam teks
-        setState(() {
-          serverResponse =
-              "Failed to fetch data from server. Status code: ${response.statusCode}";
-        });
-      }
-    } catch (error) {
-      print("Error: $error");
-      // Tampilkan pesan kesalahan di dalam teks
-      setState(() {
-        serverResponse = "Error: $error";
-      });
     }
   }
 
@@ -262,12 +101,11 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 32,
               ),
-              _InformationsComponent(widget.username),
+              _InformationsComponent(usernamee),
               SizedBox(
                 height: 40,
               ),
-              _MenuActivityComponent(
-                  serverResponse, isAbsenmasuk, isAbsenpulang),
+              MenuActivityComponent(usernamee, widget.imagePath),
               SizedBox(
                 height: 20,
               ),
@@ -276,13 +114,13 @@ class _DashboardViewState extends State<DashboardView> {
                 height: 95,
               ),
               _historyAbsensi(),
-              Text('Latitude: $_latitude'),
-              Text('Longitude: $_longitude'),
-              Text('Mock Location: $_isMockLocation'),
-              Text(
-                'respon jarak area : $serverResponse',
-                style: TextStyle(fontSize: 16),
-              ),
+              // Text('Latitude: $_latitude'),
+              // Text('Longitude: $_longitude'),
+              // Text('Mock Location: $_isMockLocation'),
+              // Text(
+              //   'respon jarak area : $serverResponse',
+              //   style: TextStyle(fontSize: 16),
+              // ),
               AppButton(
                 text: "LOG OUT",
                 onPressed: () {
@@ -324,7 +162,7 @@ class _DashboardViewState extends State<DashboardView> {
             FutureBuilder(
               future: _hasFetchedData
                   ? null
-                  : fetchHistoriPresensiByUsername(widget.username ?? "333"),
+                  : fetchHistoriPresensiByUsername(usernamee!),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
@@ -641,14 +479,400 @@ class _PresenceInfoComponent extends StatelessWidget {
   }
 }
 
-class _MenuActivityComponent extends StatelessWidget {
-  _MenuActivityComponent(serverResponse, isAbsenmasuk, isAbsenpulang);
+class MenuActivityComponent extends StatefulWidget {
+  MenuActivityComponent(usernamee, imagePathh);
 
-  String? serverResponse;
-  bool? isAbsenmasuk, isAbsenpulang;
+  @override
+  State<MenuActivityComponent> createState() => _MenuActivityComponentState();
+}
+
+class _MenuActivityComponentState extends State<MenuActivityComponent> {
+  String serverResponse = "Loading...";
+  bool isAbsenmasuk = true;
+  bool isAbsenpulang = true;
+  String _latitude = "unkwonw";
+  String _longitude = "unknown";
+
+  String? usernamee;
+  String? imagePathh;
+  bool? _isMockLocation;
+  double currentlatitude = 0.0;
+  double currentlongitude = 0.0;
+  bool _isMounted = false;
+  Timer? timer;
+  @override
+  void initState() {
+    // TODO: implement initState
+    _getLocation();
+    getPref();
+
+    timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      checkAbsen();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel(); // Cancel timer when model is disposed
+    super.dispose();
+  }
+
+  Future<void> _getLocation() async {
+    bool serviceEnabled;
+    geoloc.LocationPermission permission;
+
+    // Memeriksa apakah layanan lokasi diaktifkan
+    serviceEnabled = await geoloc.Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _showLocationServiceAlertDialog();
+      return;
+    }
+
+    // Memeriksa izin lokasi
+    permission = await geoloc.Geolocator.checkPermission();
+    if (permission == geoloc.LocationPermission.deniedForever) {
+      // Izin ditolak secara permanen, arahkan pengguna ke pengaturan
+      _showPermissionDeniedDialog();
+      return;
+    }
+
+    if (permission == geoloc.LocationPermission.denied) {
+      // Izin tidak diberikan, minta izin
+      permission = await geoloc.Geolocator.requestPermission();
+      if (permission != geoloc.LocationPermission.whileInUse &&
+          permission != geoloc.LocationPermission.always) {
+        // Izin tidak diberikan oleh pengguna, keluar dari fungsi
+        return;
+      }
+    }
+
+    // Izin diberikan, dapatkan lokasi terbaru
+    try {
+      geoloc.Position position = await geoloc.Geolocator.getCurrentPosition(
+          desiredAccuracy: geoloc.LocationAccuracy.high);
+      setState(() {
+        _latitude = position.latitude.toString();
+        _longitude = position.longitude.toString();
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void _showLocationServiceAlertDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Layanan Lokasi Tidak Aktif'),
+          content: Text(
+              'Layanan lokasi tidak diaktifkan pada perangkat Anda. Silakan aktifkan layanan lokasi.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Izin Lokasi Ditolak'),
+          content: Text(
+              'Izin lokasi telah ditolak secara permanen. Buka pengaturan aplikasi untuk mengaktifkannya.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _fakeGPS(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('PERHATIAN !!!'),
+          content: Text(
+            'Tampaknya anda menggunakan GPS palsu. saat menggunakan GPS palsu anda tidak akan dapat melakukan Absensi',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Mengerti'),
+              onPressed: () {
+                SystemNavigator.pop(); // Menutup aplikasi
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Future<void> getLocation2() async {
+  //   final hasPermisson = await requestPermission();
+  //   if (!hasPermisson) {
+  //     return showDialog(
+  //         context: context,
+  //         builder: (context) {
+  //           return AlertDialog(
+  //             title: const Text('Permission Denied'),
+  //             content: SingleChildScrollView(
+  //               child: ListBody(
+  //                 children: const [
+  //                   Text(
+  //                       "Tanpa izin penggunaan lokasi aplikasi ini tidak dapat digunakan dengan baik. Apa anda yakin menolak izin pengaktifan lokasi?",
+  //                       style: TextStyle(fontSize: 18.0)),
+  //                 ],
+  //               ),
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 child: const Text('COBA LAGI'),
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                   requestPermission();
+  //                 },
+  //               ),
+  //               TextButton(
+  //                 child: const Text('SAYA YAKIN'),
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                 },
+  //               ),
+  //             ],
+  //           );
+  //         });
+  //   } else {
+  //     //get Location
+  //     TrustLocation.start(5);
+  //     try {
+  //       TrustLocation.onChange.listen((values) {
+  //         var mockStatus = values.isMockLocation ?? false;
+  //         if (mockStatus == true) {
+  //           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //             content: Text(
+  //                 'Fake GPS terdeteksi. Mohon non aktifkan fitur Fake GPS Anda'),
+  //           ));
+  //           TrustLocation.stop();
+  //           return;
+  //         }
+
+  //         if (mounted) {
+  //           setState(() {
+  //             _latitude = double.parse(values.latitude.toString());
+  //             _longitude = double.parse(values.longitude.toString());
+  //             if (_latitude != null && _longitude != null) {
+  //               getDataFromServer(
+  //                   usernamee!, _latitude.toString(), _longitude.toString());
+  //             }
+  //           });
+  //         }
+  //       });
+  //     } on PlatformException catch (e) {
+  //       debugPrint('PlatformException $e');
+  //     }
+  //   }
+  // }
+
+  // Future<bool> requestPermission() async {
+  //   bool serviceEnabled;
+  //   locationv2.PermissionStatus permissionGranted;
+  //   serviceEnabled = await lokasi.serviceEnabled();
+
+  //   //ceck service
+  //   if (!serviceEnabled) {
+  //     serviceEnabled = await lokasi.requestService();
+  //     if (!serviceEnabled) {
+  //       return false;
+  //     }
+  //   }
+
+  //   //ceck permission
+  //   permissionGranted = await lokasi.hasPermission();
+  //   if (permissionGranted == locationv2.PermissionStatus.denied) {
+  //     permissionGranted = await lokasi.requestPermission();
+  //     if (permissionGranted != locationv2.PermissionStatus.granted) {
+  //       return false;
+  //     }
+  //   }
+
+  //   return true;
+  // }
+
+  getPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      usernamee = preferences.getString("nip");
+      imagePathh = preferences.getString("path");
+    });
+    print("usernamee: $usernamee");
+  }
+
+  Future<void> getDataFromServer(
+      String username, String latitude, String longitude) async {
+    if (latitude.isEmpty || longitude.isEmpty) {
+      // Penanganan ketika latitude atau longitude kosong
+      setState(() {
+        serverResponse = "Error: Latitude or longitude is empty";
+      });
+      return;
+    }
+
+    final Uri url = Uri.parse(Constants.BASEURL +
+        Constants.CARIJARAKTERDEKAT +
+        "?username=$username&latitude=$_latitude&longitude=$_longitude");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        print("Data from server: $responseData");
+        // Tampilkan respons di dalam teks
+        setState(() {
+          serverResponse = "$responseData";
+        });
+      } else {
+        print(
+            "Failed to fetch data from server. Status code: ${response.statusCode}");
+        // Tampilkan pesan kesalahan di dalam teks
+        setState(() {
+          serverResponse =
+              "Failed to fetch data from server. Status code: ${response.statusCode}";
+        });
+      }
+    } catch (error) {
+      print("Error: $error");
+      // Tampilkan pesan kesalahan di dalam teks
+      setState(() {
+        serverResponse = "Error: Masalah jaringan";
+        print("Error: $error");
+      });
+    }
+  }
+
+  void requestLocationPermission() async {
+    perhandler.PermissionStatus permission =
+        await perhandler.Permission.location.request();
+    print('Permissions: $permission');
+
+    // if (permission != PermissionStatus.granted) {
+    //   showPermissionDeniedDialog();
+    // }
+  }
+
+  void showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Permission Required'),
+          content: Text('Location permission is required for this app.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> checkAbesnmasuk() async {
+    print("jalanmasuk");
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.CEKABSENMASUK),
+        body: {'username': usernamee},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data != null && data is bool) {
+          setState(() {
+            isAbsenmasuk = data;
+            // print("absenmasukanda: ${isAbsenmasuk.toString()}");
+          });
+        } else {
+          print('Invalid data received from server');
+        }
+      } else {
+        print('Failed to load attendance data');
+      }
+    } catch (error) {
+      print('Errorcekmasuk: $error');
+    }
+  }
+
+  Future<void> checkAbesnpulang() async {
+    print("jalankeluar");
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.CEKABSENPULANG),
+        body: {'username': usernamee},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          isAbsenpulang = data as bool;
+          // print("absenpulanganda: ${isAbsenpulang.toString()}");
+        });
+      } else {
+        print('Failed to load attendance data');
+      }
+    } catch (error) {
+      print('Errorcekkeluar: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    print("serverResponse bwh: $serverResponse");
+    print("isAbsenmasuk bwh: $isAbsenmasuk");
+    print("isAbsenpulang bwh: $isAbsenpulang");
+    print("mocklocation anda : $_isMockLocation");
+    if (_isMockLocation == true) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Peringatan'),
+            content: Text('Maaf, alamat Anda terdeteksi sebagai lokasi palsu.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -740,16 +964,39 @@ class _MenuActivityComponent extends StatelessWidget {
               titleMenu: "Dinas Luar",
               iconPath: 'assets/images/ic_letter.png',
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PresensiDinasluar()));
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) => PresensiDinasluar()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => DinasLuarPage()));
               },
+            ),
+            Text('Latitude: $_latitude'),
+            Text('Longitude: $_longitude'),
+            Text('Mock Location: $_isMockLocation'),
+            Text(
+              'respon jarak area : $serverResponse',
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),
       ],
     );
+  }
+
+  Future<void> checkAbsen() async {
+    var _isMockLocation2 = await DetectFakeLocation().detectFakeLocation();
+    setState(() {
+      _isMockLocation = _isMockLocation2;
+    });
+    if (_isMockLocation == false) {
+      getDataFromServer(
+          usernamee!, _latitude.toString(), _longitude.toString());
+    }
+    print("mocklocationanda:$_isMockLocation");
+    await checkAbesnmasuk();
+    await checkAbesnpulang();
   }
 }
 
