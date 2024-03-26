@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 
 import '../constants/constants.dart';
@@ -62,6 +63,7 @@ class SignUpState extends State<SignUp> {
   }
 
   Future<bool> onShot() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     if (faceDetected == null) {
       showDialog(
         context: context,
@@ -80,6 +82,7 @@ class SignUpState extends State<SignUp> {
       XFile? file = await _cameraService.takePicture();
       imagePath = file?.path;
 
+      preferences.setString("gambarwajah", imagePath!);
       // Kirim gambar ke server
       bool uploadSuccess = await uploadImageToServer(imagePath!);
 
@@ -117,9 +120,9 @@ class SignUpState extends State<SignUp> {
 
       // Periksa respons dari server
       if (response.statusCode == 200) {
-        print('Image uploaded successfully');
-        Toast.show("Selamat,anda berhasil Sign Up",
-            duration: Toast.lengthShort, gravity: Toast.bottom);
+        // print('Image uploaded successfully');
+        // Toast.show("Selamat,anda berhasil Sign Up",
+        //     duration: Toast.lengthShort, gravity: Toast.bottom);
         return true;
       } else {
         print('Failed to upload image. Status code: ${response.statusCode}');
