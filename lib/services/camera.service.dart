@@ -9,7 +9,7 @@ class CameraService {
 
   InputImageRotation? _cameraRotation;
   InputImageRotation? get cameraRotation => this._cameraRotation;
-
+  late List<String> _faceImages = [];
   String? _imagePath;
   String? get imagePath => this._imagePath;
 
@@ -49,6 +49,17 @@ class CameraService {
         return InputImageRotation.rotation270deg;
       default:
         return InputImageRotation.rotation0deg;
+    }
+  }
+
+  void addFaceImage(String imagePath) {
+    _faceImages.add(imagePath);
+  }
+
+  void stopImageStream() {
+    if (_cameraController != null &&
+        _cameraController!.value.isStreamingImages) {
+      _cameraController!.stopImageStream();
     }
   }
 

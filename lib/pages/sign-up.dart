@@ -51,6 +51,9 @@ class SignUpState extends State<SignUp> {
   @override
   void dispose() {
     _cameraService.dispose();
+    _mlService.dispose();
+    _faceDetectorService.dispose();
+
     super.dispose();
   }
 

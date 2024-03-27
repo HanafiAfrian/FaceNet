@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:face_net_authentication/locator.dart';
@@ -11,6 +14,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 // import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
+import 'package:trust_location/trust_location.dart';
 
 import '../../constants/constants.dart';
 import '../main_screen.dart';
@@ -39,9 +43,49 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
   }
 
   Future<void> getLocationPermissionsAndStart() async {
+    bool isFakeLocation = await isFakeGPS();
+    if (isFakeLocation) {
+      _fakeGPS(context);
+    }
     await requestLocationPermission();
     // TrustLocation.start(5);
     getLocation();
+  }
+
+  void _fakeGPS(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('PERHATIAN !!!'),
+          content: Text(
+            'Tampaknya anda menggunakan GPS palsu. saat menggunakan GPS palsu anda tidak akan dapat melakukan Absensi',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Mengerti'),
+              onPressed: () {
+                SystemNavigator.pop(); // Menutup aplikasi
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> isFakeGPS() async {
+    if (Platform.isAndroid) {
+      await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      bool isMockLocation = await TrustLocation.isMockLocation;
+      return isMockLocation;
+    } else {
+      return false;
+    }
   }
 
   Future<void> requestLocationPermission() async {

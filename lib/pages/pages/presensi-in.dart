@@ -21,7 +21,7 @@ class PresensiIn extends StatefulWidget {
 
 class PresensiInState extends State<PresensiIn> {
   CameraService _cameraService = locator<CameraService>();
-  FaceDetectorService _faceDetectorService = locator<FaceDetectorService>();
+  late FaceDetectorService _faceDetectorService; // Changed to late
   MLService _mlService = locator<MLService>();
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -32,7 +32,12 @@ class PresensiInState extends State<PresensiIn> {
   @override
   void initState() {
     super.initState();
+    _initializeServices(); // Initialize services
     _start();
+  }
+
+  void _initializeServices() {
+    _faceDetectorService = locator<FaceDetectorService>(); // Initialize here
   }
 
   @override
@@ -43,27 +48,32 @@ class PresensiInState extends State<PresensiIn> {
     super.dispose();
   }
 
-  Future _start() async {
+  Future<void> _start() async {
     setState(() => _isInitializing = true);
     await _cameraService.initialize();
     setState(() => _isInitializing = false);
     _frameFaces();
   }
 
-  _frameFaces() async {
+  void _frameFaces() {
     bool processing = false;
     _cameraService.cameraController!
         .startImageStream((CameraImage image) async {
       if (processing) return; // prevents unnecessary overprocessing.
       processing = true;
-      await _predictFacesFromImage(image: image);
+      if (_faceDetectorService != null) {
+        // Check if _faceDetectorService has been initialized
+        await _predictFacesFromImage(image: image);
+      }
       processing = false;
     });
   }
 
-  Future<void> _predictFacesFromImage({@required CameraImage? image}) async {
-    assert(image != null, 'Image is null');
-    await _faceDetectorService.detectFacesFromImage(image!);
+  Future<void> _predictFacesFromImage({required CameraImage image}) async {
+    if (_faceDetectorService == null) {
+      return; // Avoid usage before initialization
+    }
+    await _faceDetectorService.detectFacesFromImage(image);
     if (_faceDetectorService.faceDetected) {
       _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
     }
@@ -82,11 +92,11 @@ class PresensiInState extends State<PresensiIn> {
     }
   }
 
-  _onBackPressed() {
+  void _onBackPressed() {
     Navigator.of(context).pop();
   }
 
-  _reload() {
+  void _reload() {
     if (mounted) setState(() => _isPictureTaken = false);
     _start();
   }
@@ -126,7 +136,7 @@ class PresensiInState extends State<PresensiIn> {
     );
   }
 
-  presensiInSheet({@required User? user}) => user == null
+  Widget presensiInSheet({required User? user}) => user == null
       ? Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(20),

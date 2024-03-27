@@ -15,6 +15,10 @@ import '../../../constants/colors.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/fonts.dart';
 import '../../../constants/sizes.dart';
+import '../../../locator.dart';
+import '../../../services/camera.service.dart';
+import '../../../services/face_detector_service.dart';
+import '../../../services/ml_service.dart';
 import '../../../utils/alert_utils.dart';
 
 import 'package:http/http.dart' as http;
@@ -38,10 +42,23 @@ class _DashboardViewState extends State<DashboardView> {
   final String githubURL =
       "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
   String? usernamee;
+  MLService _mlService = locator<MLService>();
+  FaceDetectorService _mlKitService = locator<FaceDetectorService>();
+  CameraService _cameraService = locator<CameraService>();
+  bool loading = false;
   @override
   void initState() {
     super.initState();
+    _initializeServices();
     getPref();
+  }
+
+  _initializeServices() async {
+    setState(() => loading = true);
+    await _cameraService.initialize();
+    await _mlService.initialize();
+    _mlKitService.initialize();
+    setState(() => loading = false);
   }
 
   getPref() async {
