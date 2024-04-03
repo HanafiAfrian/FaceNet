@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:face_net_authentication/constants/colors.dart';
 import 'package:face_net_authentication/constants/constants.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import '../models/user.model.dart';
 
 class DinasLuarPage extends StatefulWidget {
-  DinasLuarPage({Key? key,   this.imagepath})
-      : super(key: key);
-  
+  DinasLuarPage({Key? key, this.imagepath}) : super(key: key);
+
   String? imagepath;
 
   @override
@@ -160,7 +160,11 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Upload Document'),
+        title: Text(
+          'Upload Document',
+          style: TextStyle(color: whiteColor),
+        ),
+        backgroundColor: Colors.blueGrey[900],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -169,7 +173,10 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
           children: <Widget>[
             ElevatedButton(
               onPressed: _pickPdf,
-              child: Text('Pick PDF'),
+              child: Text('Pick PDF', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blueGrey[900],
+              ),
             ),
             _pdfFile != null
                 ? Text(_pdfFile!.path.split('/').last)
@@ -177,7 +184,11 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: _takePicture,
-              child: Text('Take Picture'),
+              child:
+                  Text('Take Picture', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blueGrey[900],
+              ),
             ),
             _imageFile != null
                 ? Image.file(
@@ -215,7 +226,11 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: _uploadDocument,
-              child: Text('Upload Document'),
+              child: Text('Upload Document',
+                  style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blueGrey[900],
+              ),
             ),
           ],
         ),

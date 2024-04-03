@@ -33,6 +33,7 @@ class AuthActionButton extends StatefulWidget {
 }
 
 class _AuthActionButtonState extends State<AuthActionButton> {
+  PersistentBottomSheetController? _bottomSheetController;
   final MLService _mlService = locator<MLService>();
   final CameraService _cameraService = locator<CameraService>();
   final TextEditingController _nipTextEditingController =
@@ -42,7 +43,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       TextEditingController(text: '');
   final TextEditingController _passwordTextEditingController =
       TextEditingController(text: '');
-  String selectedRole = 'Tendik'; // Default role selection
+  String selectedRole = 'Pilih Role'; // Default role selection
   User? predictedUser;
 
   Future _signUp(context) async {
@@ -249,10 +250,8 @@ class _AuthActionButtonState extends State<AuthActionButton> {
             this.predictedUser = user;
           }
         }
-        PersistentBottomSheetController bottomSheetController =
-            Scaffold.of(context)
-                .showBottomSheet((context) => signSheet(context));
-        bottomSheetController.closed.whenComplete(() => widget.reload());
+        signSheet(context);
+        // bottomSheetController.closed.whenComplete(() => widget.reload());
       }
     } catch (e) {
       print(e);
@@ -297,191 +296,286 @@ class _AuthActionButtonState extends State<AuthActionButton> {
   }
 
   signSheet(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          widget.isLogin && predictedUser != null
-              ? Container(
-                  child: Text(
-                    'Selamat Datang, ' + predictedUser!.user + '.',
-                    style: TextStyle(fontSize: 20),
+    _bottomSheetController = showBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.green, // Warna latar belakang hijau
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                )
-              : widget.isLogin
-                  ? Container(
-                      child: Text(
-                      'User Tidak Ditemukan',
-                      style: TextStyle(fontSize: 20),
-                    ))
-                  : Container(),
-          widget.isAbsenmasuk && predictedUser != null
-              ? Container(
-                  child: Text(
-                    'Selamat Datang Abesen Masuk, ' + predictedUser!.user + '.',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                )
-              : widget.isAbsenmasuk
-                  ? Container(
-                      child: Text(
-                      'User Tidak ABSESN MASUK Ditemukan ',
-                      style: TextStyle(fontSize: 20),
-                    ))
-                  : Container(),
-          widget.isAbsenkeluar && predictedUser != null
-              ? Container(
-                  child: Text(
-                    'Selamat Datang Abesen keluar, ' +
-                        predictedUser!.user +
-                        '.',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                )
-              : widget.isAbsenkeluar
-                  ? Container(
-                      child: Text(
-                      'User Tidak ABSESN keluar Ditemukan ',
-                      style: TextStyle(fontSize: 20),
-                    ))
-                  : Container(),
-          widget.isAbsendinasluar && predictedUser != null
-              ? Container(
-                  child: Text(
-                    'Selamat Datang Abesen Dinas Luar, ' +
-                        predictedUser!.user +
-                        '.',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                )
-              : widget.isAbsendinasluar
-                  ? Container(
-                      child: Text(
-                      'User Tidak ABSESN MASUK Ditemukan ',
-                      style: TextStyle(fontSize: 20),
-                    ))
-                  : Container(),
-          Container(
-            child: Column(
-              children: [
-                !widget.isLogin
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "PNS Menggunakan NIP, Non PNS Menggunakan NIKU",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(
-                              height:
-                                  8), // Jarak antara teks di atas dan AppTextField
-                          AppTextField(
-                            controller: _nipTextEditingController,
-                            labelText: "Masukkan NIP/NIKU",
-                          ),
-                        ],
-                      )
-                    : Container(),
-                SizedBox(height: 10),
-                DropdownButton<String>(
-                  value: selectedRole,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedRole = newValue!;
-                    });
-                  },
-                  items: <String>['Tendik', 'Dosen']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
                 ),
-                SizedBox(height: 10),
-                !widget.isLogin
-                    ? AppTextField(
-                        controller: _userTextEditingController,
-                        labelText: "Nama Lengkap",
-                      )
-                    : Container(),
-                SizedBox(height: 10),
-                widget.isLogin && predictedUser == null
-                    ? Container()
-                    : AppTextField(
-                        controller: _passwordTextEditingController,
-                        labelText: "Password",
-                        isPassword: true,
-                      ),
-                SizedBox(height: 10),
-                SizedBox(height: 10),
-                widget.isLogin && predictedUser != null
-                    ? AppButton(
-                        text: 'LOGIN',
-                        onPressed: () async {
-                          _signIn(context);
-                        },
-                        icon: Icon(
-                          Icons.login,
-                          color: Colors.white,
-                        ),
-                      )
-                    : widget.isAbsenmasuk
-                        ? AppButton(
-                            text: 'ABESN MASUK WIDGET',
-                            onPressed: () async {
-                              await _presensiIn(context);
-                            },
-                            icon: Icon(
-                              Icons.person_add,
-                              color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      widget.isLogin && predictedUser != null
+                          ? Container(
+                              child: Text(
+                                'Selamat Datang, ' + predictedUser!.user + '.',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            )
+                          : widget.isLogin
+                              ? Container(
+                                  child: Text(
+                                  'User Tidak Ditemukan',
+                                  style: TextStyle(fontSize: 20),
+                                ))
+                              : Container(),
+                      widget.isAbsenmasuk && predictedUser != null
+                          ? Container(
+                              child: Text(
+                                'Selamat Datang Abesen Masuk, ' +
+                                    predictedUser!.user +
+                                    '.',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            )
+                          : widget.isAbsenmasuk
+                              ? Container(
+                                  child: Text(
+                                  'User Tidak ABSESN MASUK Ditemukan ',
+                                  style: TextStyle(fontSize: 20),
+                                ))
+                              : Container(),
+                      widget.isAbsenkeluar && predictedUser != null
+                          ? Container(
+                              child: Text(
+                                'Selamat Datang Abesen keluar, ' +
+                                    predictedUser!.user +
+                                    '.',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            )
+                          : widget.isAbsenkeluar
+                              ? Container(
+                                  child: Text(
+                                  'User Tidak ABSESN keluar Ditemukan ',
+                                  style: TextStyle(fontSize: 20),
+                                ))
+                              : Container(),
+                      widget.isAbsendinasluar && predictedUser != null
+                          ? Container(
+                              child: Text(
+                                'Selamat Datang Abesen Dinas Luar, ' +
+                                    predictedUser!.user +
+                                    '.',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            )
+                          : widget.isAbsendinasluar
+                              ? Container(
+                                  child: Text(
+                                  'User Tidak ABSESN MASUK Ditemukan ',
+                                  style: TextStyle(fontSize: 20),
+                                ))
+                              : Container(),
+                      Container(
+                        child: Column(
+                          children: [
+                            !widget.isLogin
+                                ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      RichText(
+                                        text: TextSpan(
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black),
+                                          children: [
+                                            TextSpan(
+                                                text: 'PNS',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black)),
+                                            TextSpan(
+                                                text: ' gunakan ',
+                                                style: TextStyle(
+                                                    color: Colors.white)),
+                                            TextSpan(
+                                                text: 'NIP',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black)),
+                                            TextSpan(text: ', '),
+                                            TextSpan(
+                                                text: 'Non PNS',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors
+                                                        .yellow.shade800)),
+                                            TextSpan(
+                                                text: ' gunakan ',
+                                                style: TextStyle(
+                                                    color: Colors.white)),
+                                            TextSpan(
+                                                text: 'NIKU',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors
+                                                        .yellow.shade800)),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          height:
+                                              8), // Jarak antara teks di atas dan AppTextField
+                                      AppTextField(
+                                        controller: _nipTextEditingController,
+                                        labelText: "Masukkan NIP/NIKU",
+                                      ),
+                                    ],
+                                  )
+                                : Container(),
+                            SizedBox(height: 10),
+                            DropdownButton<String>(
+                              value: selectedRole,
+                              dropdownColor: Colors.green,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedRole = newValue!;
+                                });
+                              },
+                              items: <String>[
+                                'Pilih Role',
+                                'Dosen',
+                                'Item 3'
+                              ].map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          )
-                        : widget.isAbsendinasluar
-                            ? AppButton(
-                                text: 'ABESN MASUK WIDGET',
-                                onPressed: () async {
-                                  await _presensiDinasluar(context);
-                                },
-                                icon: Icon(
-                                  Icons.person_add,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : widget.isAbsenkeluar
+                            SizedBox(height: 10),
+                            !widget.isLogin
+                                ? AppTextField(
+                                    controller: _userTextEditingController,
+                                    labelText: "Nama Lengkap",
+                                  )
+                                : Container(),
+                            SizedBox(height: 10),
+                            widget.isLogin && predictedUser == null
+                                ? Container()
+                                : AppTextField(
+                                    controller: _passwordTextEditingController,
+                                    labelText: "Password",
+                                    isPassword: true,
+                                  ),
+                            SizedBox(height: 10),
+                            SizedBox(height: 10),
+                            widget.isLogin && predictedUser != null
                                 ? AppButton(
-                                    text: 'ABESN keluar WIDGET',
+                                    text: 'LOGIN',
                                     onPressed: () async {
-                                      await _presensiAuth(context);
+                                      _signIn(context);
                                     },
                                     icon: Icon(
-                                      Icons.person_add,
+                                      Icons.login,
                                       color: Colors.white,
                                     ),
                                   )
-                                : !widget.isLogin
+                                : widget.isAbsenmasuk
                                     ? AppButton(
-                                        text: 'SIGN UP',
+                                        text: 'ABESN MASUK WIDGET',
                                         onPressed: () async {
-                                          await _signUp(context);
+                                          await _presensiIn(context);
                                         },
                                         icon: Icon(
                                           Icons.person_add,
                                           color: Colors.white,
                                         ),
                                       )
-                                    : Container(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+                                    : widget.isAbsendinasluar
+                                        ? AppButton(
+                                            text: 'ABESN MASUK WIDGET',
+                                            onPressed: () async {
+                                              await _presensiDinasluar(context);
+                                            },
+                                            icon: Icon(
+                                              Icons.person_add,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : widget.isAbsenkeluar
+                                            ? AppButton(
+                                                text: 'ABESN keluar WIDGET',
+                                                onPressed: () async {
+                                                  await _presensiAuth(context);
+                                                },
+                                                icon: Icon(
+                                                  Icons.person_add,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : !widget.isLogin
+                                                ? AppButton(
+                                                    color: Colors.grey.shade600,
+                                                    text: 'SIGN UP',
+                                                    onPressed: () async {
+                                                      if (selectedRole ==
+                                                          'Pilih Role') {
+                                                        // Menampilkan alert jika pengguna tidak memilih role
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return AlertDialog(
+                                                              title: Text(
+                                                                  'Peringatan'),
+                                                              content: Text(
+                                                                  'Silakan pilih role terlebih dahulu.'),
+                                                              actions: <Widget>[
+                                                                TextButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  },
+                                                                  child: Text(
+                                                                      'OK'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                        return; // Hentikan eksekusi selanjutnya jika role tidak dipilih
+                                                      } else {
+                                                        await _signUp(context);
+                                                      }
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.person_add,
+                                                      color: Colors.white,
+                                                    ),
+                                                  )
+                                                : Container(),
+                          ],
+                        ),
+                      ),
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     _bottomSheetController?.close();
+                      //   },
+                      //   child: Text('Close Bottom Sheet'),
+                      // ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        });
   }
 
   @override
