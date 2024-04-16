@@ -168,21 +168,42 @@ class _PresenceActivityComponent extends StatelessWidget {
   }
 }
 
-class _UserPresenceComponent extends StatelessWidget {
-  final String? userName;
-  final int? absentTime;
-  final String? photoURL;
-
-  _UserPresenceComponent({this.userName, this.absentTime, this.photoURL});
+class UserPresenceComponent extends StatelessWidget {
+  final String? hari;
+  final String? absentTimeMasuk, absentTimePulang;
+  final String? photoURL, tanggal;
+  String? timemasuk, timepulang;
+  UserPresenceComponent(
+      {this.hari,
+      this.tanggal,
+      this.absentTimeMasuk,
+      this.absentTimePulang,
+      this.photoURL});
 
   @override
   Widget build(BuildContext context) {
-    String time = DateFormat('hh : mm : ss')
-        .format(DateTime.fromMillisecondsSinceEpoch(absentTime!));
+    if (absentTimeMasuk != null && absentTimeMasuk != "") {
+      DateTime parsedTime = DateFormat('HH:mm:ss').parse(absentTimeMasuk!);
+// Formatting objek DateTime ke format yang diinginkan dengan AM/PM
+      timemasuk = DateFormat('hh : mm : ss a').format(parsedTime);
+    } else {
+      print("Waktu absen masuk tidak tersedia.");
+    }
+    if (absentTimePulang != null && absentTimePulang != "") {
+      DateTime parsedTimePulang =
+          DateFormat('HH:mm:ss').parse(absentTimePulang!);
+// Formatting objek DateTime ke format yang diinginkan dengan AM/PM
+      timepulang = DateFormat('hh : mm : ss a').format(parsedTimePulang);
+    } else {
+      print("Waktu absen pulang tidak tersedia.");
+    }
+    DateTime parsedDate = DateTime.parse(tanggal!);
 
+    // Formatting objek DateTime ke format yang diinginkan
+    String newTanggal = DateFormat('dd-MMMM-yyyy').format(parsedDate);
     return Container(
       width: deviceWidth(context),
-      height: 74,
+      height: 104,
       padding: EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
@@ -231,39 +252,71 @@ class _UserPresenceComponent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                userName!,
+                hari! + " / $newTanggal",
                 style: semiBlackFont.copyWith(fontSize: 13),
               ),
               SizedBox(
                 height: 6,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 14,
-                    margin: EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Masuk",
-                        style: boldWhiteFont.copyWith(
-                          fontSize: 10,
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 14,
+                      margin: EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: timemasuk != null ? primaryColor : red,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Masuk",
+                          style: boldWhiteFont.copyWith(
+                            fontSize: 10,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Text(
-                    time + " WIB",
-                    style: semiBlackFont.copyWith(
-                      fontSize: 11,
+                    Text(
+                      timemasuk ?? "-",
+                      style: semiBlackFont.copyWith(
+                        fontSize: 11,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 14,
+                      margin: EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: timepulang != null ? primaryColor : red,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Pulang",
+                          style: boldWhiteFont.copyWith(
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      timepulang ?? "-",
+                      style: semiBlackFont.copyWith(
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

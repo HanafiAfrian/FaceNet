@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'pages/presensi-dinasluar.dart';
+
 class Profile extends StatefulWidget {
   const Profile(this.username, {Key? key, required this.imagePath})
       : super(key: key);

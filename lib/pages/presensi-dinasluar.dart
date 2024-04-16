@@ -4,7 +4,7 @@ import 'package:face_net_authentication/pages/models/user.model.dart';
 import 'package:face_net_authentication/pages/widgets/auth_button.dart';
 import 'package:face_net_authentication/pages/widgets/camera_detection_preview.dart';
 import 'package:face_net_authentication/pages/widgets/camera_header.dart';
-import 'package:face_net_authentication/pages/widgets/presensidinasluar_form.dart';
+import 'package:face_net_authentication/pages/widgets/presensiin_form.dart';
 import 'package:face_net_authentication/pages/widgets/single_picture.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
@@ -14,14 +14,14 @@ import 'package:flutter/material.dart';
 
 import 'pages/dinasluar.dart';
 
-class PresensiDinasluar extends StatefulWidget {
-  const PresensiDinasluar({Key? key}) : super(key: key);
+class PresensiDinasLuar extends StatefulWidget {
+  const PresensiDinasLuar({Key? key}) : super(key: key);
 
   @override
-  PresensiDinasluarState createState() => PresensiDinasluarState();
+  PresensiDinasLuarState createState() => PresensiDinasLuarState();
 }
 
-class PresensiDinasluarState extends State<PresensiDinasluar> {
+class PresensiDinasLuarState extends State<PresensiDinasLuar> {
   CameraService _cameraService = locator<CameraService>();
   FaceDetectorService _faceDetectorService = locator<FaceDetectorService>();
   MLService _mlService = locator<MLService>();
@@ -30,7 +30,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   bool _isPictureTaken = false;
   bool _isInitializing = false;
-  bool _isFaceDetectorInitialized = false; // Tambah variabel ini
+
   @override
   void initState() {
     super.initState();
@@ -48,12 +48,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
   Future _start() async {
     setState(() => _isInitializing = true);
     await _cameraService.initialize();
-    _faceDetectorService.initialize(); // Inisialisasi detektor wajah
-    setState(() {
-      _isInitializing = false;
-      _isFaceDetectorInitialized =
-          true; // Atur menjadi true setelah inisialisasi selesai
-    });
+    setState(() => _isInitializing = false);
     _frameFaces();
   }
 
@@ -70,17 +65,11 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   Future<void> _predictFacesFromImage({@required CameraImage? image}) async {
     assert(image != null, 'Image is null');
-    if (_isFaceDetectorInitialized) {
-      // Periksa apakah detektor wajah sudah diinisialisasi
-      await _faceDetectorService.detectFacesFromImage(image!);
-      if (_faceDetectorService.faceDetected) {
-        _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
-      }
-      if (mounted) setState(() {});
-    } else {
-      // Tambahkan penanganan ketika detektor wajah belum diinisialisasi.
-      print('Face detector service is not initialized yet.');
+    await _faceDetectorService.detectFacesFromImage(image!);
+    if (_faceDetectorService.faceDetected) {
+      _mlService.setCurrentPrediction(image, _faceDetectorService.faces[0]);
     }
+    if (mounted) setState(() {});
   }
 
   Future<void> takePicture() async {
@@ -109,11 +98,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
     if (_faceDetectorService.faceDetected) {
       User? user = await _mlService.predict();
       var bottomSheetController = scaffoldKey.currentState!
-          .showBottomSheet((context) => presensiDinasluarSheet(user: user));
-      // print("user" + user!.nip);
-      // print(
-      //   "camerapath" + _cameraService.imagePath!,
-      // );
+          .showBottomSheet((context) => presensiInSheet(user: user));
       bottomSheetController.closed.whenComplete(_reload);
     }
   }
@@ -127,9 +112,8 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
 
   @override
   Widget build(BuildContext context) {
-    Widget header = Flexible(
-        child: CameraHeader("DINAS LUAR", onBackPressed: _onBackPressed));
-    Widget body = SingleChildScrollView(child: getBodyWidget());
+    Widget header = CameraHeader("DINAS LUAR", onBackPressed: _onBackPressed);
+    Widget body = getBodyWidget();
     Widget? fab;
     if (!_isPictureTaken) fab = AuthButton(onTap: onTap);
 
@@ -143,7 +127,7 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
     );
   }
 
-  presensiDinasluarSheet({@required User? user}) => user == null
+  presensiInSheet({@required User? user}) => user == null
       ? Container(
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(20),
@@ -152,8 +136,11 @@ class PresensiDinasluarState extends State<PresensiDinasluar> {
             style: TextStyle(fontSize: 20),
           ),
         )
-      : DinasLuarPage(
-          // user: user,
-          imagepath: _cameraService.imagePath!,
-        );
+      : Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => DinasLuarPage(
+                    nip: user.nip,
+                    imagepath: _cameraService.imagePath,
+                  )));
 }

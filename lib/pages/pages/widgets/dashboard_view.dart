@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:detect_fake_location/detect_fake_location.dart';
 import 'package:face_net_authentication/pages/home.dart';
 import 'package:face_net_authentication/pages/pages/presensi-in.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +26,7 @@ import '../../presensi-auth.dart';
 import '../../presensi-dinasluar.dart';
 import '../../widgets/app_button.dart';
 import '../dinasluar.dart';
+import 'presence_view.dart';
 
 class DashboardView extends StatefulWidget {
   DashboardView({this.username, Key? key, this.imagePath}) : super(key: key);
@@ -46,11 +46,15 @@ class _DashboardViewState extends State<DashboardView> {
   FaceDetectorService _mlKitService = locator<FaceDetectorService>();
   CameraService _cameraService = locator<CameraService>();
   bool loading = false;
+  List<Map<String, dynamic>>? historiPresensi;
+  String? namalengkap;
+  bool _showMore = false;
+
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     getPref();
+    _initializeServices();
   }
 
   _initializeServices() async {
@@ -65,9 +69,10 @@ class _DashboardViewState extends State<DashboardView> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       usernamee = preferences.getString("nip");
+      namalengkap = preferences.getString("namalengkap");
       widget.imagePath = preferences.getString("path");
     });
-    print("usernameanda: ${usernamee}");
+    print("usernameanda: ${usernamee} dan namalengkap $namalengkap");
   }
 
   void _launchURL() async {
@@ -80,13 +85,18 @@ class _DashboardViewState extends State<DashboardView> {
       Constants.BASEURL + Constants.HISTORIABSENSI;
 
   Future<List<Map<String, dynamic>>> fetchHistoriPresensiByUsername(
-      String username) async {
+      String? username) async {
     final Uri url = Uri.parse("${historiPresensiURL}?username=$username");
     final response = await http.get(url);
     print("url : $url");
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
-      return List<Map<String, dynamic>>.from(data);
+      print("dataanda$data");
+      if (data == []) {
+        return [];
+      } else {
+        return List<Map<String, dynamic>>.from(data);
+      }
     } else {
       throw Exception('Failed to load histori presensi');
     }
@@ -118,7 +128,7 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 32,
               ),
-              _InformationsComponent(usernamee),
+              _InformationsComponent(namalengkap),
               SizedBox(
                 height: 40,
               ),
@@ -128,7 +138,7 @@ class _DashboardViewState extends State<DashboardView> {
               ),
               _AnnouncementComponent(),
               SizedBox(
-                height: 95,
+                height: 25,
               ),
               _historyAbsensi(),
               // Text('Latitude: $_latitude'),
@@ -138,6 +148,9 @@ class _DashboardViewState extends State<DashboardView> {
               //   'respon jarak area : $serverResponse',
               //   style: TextStyle(fontSize: 16),
               // ),
+              SizedBox(
+                height: 95,
+              ),
               AppButton(
                 text: "LOG OUT",
                 onPressed: () {
@@ -168,75 +181,68 @@ class _DashboardViewState extends State<DashboardView> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Histori Presensi',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 25),
+                  child: Text(
+                    'Histori Presensi',
+                    style: semiBlackFont.copyWith(fontSize: 14),
+                  ),
+                ),
+                if (historiPresensi != null && historiPresensi!.length > 5)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _showMore = !_showMore;
+                        });
+                      },
+                      child: Text(_showMore ? 'Show less' : 'Show more'),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(height: 10),
             FutureBuilder(
               future: _hasFetchedData
                   ? null
-                  : fetchHistoriPresensiByUsername(usernamee!),
+                  : fetchHistoriPresensiByUsername(usernamee),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  List<Map<String, dynamic>> historiPresensi =
-                      snapshot.data ?? [];
+                  historiPresensi = snapshot.data;
                   _hasFetchedData = true;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: historiPresensi.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        elevation: 3,
-                        margin:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                        child: ListTile(
-                          title: Text(
-                            'Tanggal: ${historiPresensi[index]["tanggal"]}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  return historiPresensi != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _showMore
+                                ? historiPresensi?.length
+                                : (historiPresensi!.length > 5
+                                    ? 5
+                                    : historiPresensi?.length),
+                            itemBuilder: (context, index) =>
+                                UserPresenceComponent(
+                              hari: historiPresensi?[index]['hari'],
+                              tanggal: historiPresensi?[index]['tanggal'],
+                              absentTimeMasuk: historiPresensi?[index]
+                                  ['jammasuk'],
+                              absentTimePulang: historiPresensi?[index]
+                                  ['jamkeluar'],
+                              photoURL: historiPresensi?[index]['userPhoto'],
                             ),
                           ),
-                          subtitle: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'Absen Masuk: ${historiPresensi[index]["absen_masuk"]}'),
-                                  Text(
-                                      'Jam Masuk: ${historiPresensi[index]["jammasuk"]}'),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'Absen Keluar: ${historiPresensi[index]["absen_keluar"]}'),
-                                  Text(
-                                      'Jam Keluar: ${historiPresensi[index]["jamkeluar"]}'),
-                                ],
-                              ),
-                            ],
-                          ),
-                          contentPadding: EdgeInsets.all(16),
-                          tileColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
-                    },
-                  );
+                        )
+                      : Center(
+                          child: Text("belum ada data"),
+                        );
                 }
               },
             ),
@@ -422,7 +428,7 @@ class _InformationsComponent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hi ' + '!',
+          'Hi ' + username.toString() + '!',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         Text(
@@ -531,8 +537,8 @@ class _MenuActivityComponentState extends State<MenuActivityComponent> {
 
   @override
   void dispose() {
-    timer?.cancel(); // Cancel timer when model is disposed
     super.dispose();
+    timer?.cancel(); // Cancel timer when model is disposed
   }
 
   Future<void> _getLocation() async {
@@ -665,7 +671,7 @@ class _MenuActivityComponentState extends State<MenuActivityComponent> {
 
     final Uri url = Uri.parse(Constants.BASEURL +
         Constants.CARIJARAKTERDEKAT +
-        "?username=$username&latitude=$_latitude&longitude=$_longitude");
+        "?username=$usernamee&latitude=$_latitude&longitude=$_longitude");
 
     try {
       final response = await http.get(url);
@@ -894,8 +900,10 @@ class _MenuActivityComponentState extends State<MenuActivityComponent> {
                 //   context,
                 //   MaterialPageRoute(
                 //       builder: (context) => PresensiDinasluar()));
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => DinasLuarPage()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PresensiDinasLuar()));
               },
             ),
             Text('Latitude: $_latitude'),
@@ -912,14 +920,13 @@ class _MenuActivityComponentState extends State<MenuActivityComponent> {
   }
 
   Future<void> checkAbsen() async {
-    var _isMockLocation2 = await DetectFakeLocation().detectFakeLocation();
-    setState(() {
-      _isMockLocation = _isMockLocation2;
-    });
-    if (_isMockLocation == false) {
-      getDataFromServer(
-          usernamee!, _latitude.toString(), _longitude.toString());
-    }
+    // var _isMockLocation2 = await DetectFakeLocation().detectFakeLocation();
+    // setState(() {
+    //   _isMockLocation = _isMockLocation2;
+    // });
+
+    getDataFromServer(usernamee!, _latitude.toString(), _longitude.toString());
+    if (_isMockLocation == false) {}
     print("mocklocationanda:$_isMockLocation");
     await checkAbesnmasuk();
     await checkAbesnpulang();

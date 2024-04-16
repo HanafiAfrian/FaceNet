@@ -7,6 +7,7 @@ import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/constants.dart';
 import '../home.dart';
 import '../main_screen.dart';
@@ -446,7 +447,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
                               items: <String>[
                                 'Pilih Role',
                                 'Dosen',
-                                'Item 3'
+                                'Tendik'
                               ].map<DropdownMenuItem<String>>((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
@@ -551,6 +552,14 @@ class _AuthActionButtonState extends State<AuthActionButton> {
                                                         );
                                                         return; // Hentikan eksekusi selanjutnya jika role tidak dipilih
                                                       } else {
+                                                        SharedPreferences
+                                                            preferences =
+                                                            await SharedPreferences
+                                                                .getInstance();
+                                                        preferences.setString(
+                                                            "namalengkap",
+                                                            _userTextEditingController
+                                                                .text);
                                                         await _signUp(context);
                                                       }
                                                     },

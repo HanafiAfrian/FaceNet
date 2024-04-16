@@ -66,7 +66,7 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       bool login = preferences.getBool("login") ?? false;
       String? nip = preferences.getString("nip");
-      String? path = preferences.getString("path") ;
+      String? path = preferences.getString("path");
       if (login) {
         //untuk perpindahan halaman
         // Navigator.pushReplacement(

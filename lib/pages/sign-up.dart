@@ -198,23 +198,20 @@ class SignUpState extends State<SignUp> {
       body = Center(
         child: CircularProgressIndicator(),
       );
-    }
-
-    if (!_initializing && pictureTaken) {
+    } else if (!_initializing && pictureTaken && imagePath != null) {
       body = Container(
         width: width,
         height: height,
         child: Transform(
-            alignment: Alignment.center,
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: Image.file(File(imagePath!)),
-            ),
-            transform: Matrix4.rotationY(mirror)),
+          alignment: Alignment.center,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Image.file(File(imagePath!)),
+          ),
+          transform: Matrix4.rotationY(mirror),
+        ),
       );
-    }
-
-    if (!_initializing && !pictureTaken) {
+    } else if (!_initializing && !pictureTaken) {
       body = Transform.scale(
         scale: 1.0,
         child: AspectRatio(
@@ -242,6 +239,9 @@ class SignUpState extends State<SignUp> {
           ),
         ),
       );
+    } else {
+      // Default value if none of the conditions are met
+      body = Container();
     }
 
     return Scaffold(

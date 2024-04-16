@@ -12,27 +12,12 @@ import 'package:image_picker/image_picker.dart';
 import '../models/user.model.dart';
 
 class DinasLuarPage extends StatefulWidget {
-  DinasLuarPage({Key? key, this.imagepath}) : super(key: key);
+  DinasLuarPage({Key? key, this.imagepath, this.nip}) : super(key: key);
 
-  String? imagepath;
+  String? imagepath, nip;
 
   @override
   _DinasLuarPageState createState() => _DinasLuarPageState();
-}
-
-void main() {
-  // Add this line before making the network request
-  HttpOverrides.global = MyHttpOverrides();
-  // ...
-}
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-  }
 }
 
 class _DinasLuarPageState extends State<DinasLuarPage> {
@@ -40,7 +25,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
   File? _imageFile;
   String _taskNumber = '';
   String _nip = '';
-  String _serverTime = '';
+  // String _serverTime = '';
 
   Future<void> _pickPdf() async {
     final pdfFile = await FilePicker.platform.pickFiles(
@@ -65,11 +50,11 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
   }
 
   _uploadDocument() async {
-    final serverTime = DateTime.now().toString();
-    setState(() {
-      _serverTime = serverTime;
-    });
-    if (_pdfFile != null && _imageFile != null) {
+    // final serverTime = DateTime.now().toString();
+    // setState(() {
+    //   _serverTime = serverTime;
+    // });
+    if (_pdfFile != null && widget.imagepath != null) {
       // Simulate backend request to get server time
       // Replace this with your actual backend call to get server time
       // await Future.delayed(Duration(seconds: 2));
@@ -106,7 +91,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
         var request = http.MultipartRequest('POST', url)
           ..fields['no_tugas'] = _taskNumber
           ..fields['nip'] = _nip
-          ..fields['waktu'] = _serverTime
+          // ..fields['waktu'] = _serverTime
           ..files.add(http.MultipartFile(
             'pdf_document',
             _pdfFile!.readAsBytes().asStream(),
@@ -115,9 +100,9 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
           ))
           ..files.add(http.MultipartFile(
             'image_document',
-            _imageFile!.readAsBytes().asStream(),
-            _imageFile!.lengthSync(),
-            filename: _imageFile!.path.split('/').last,
+            File(widget.imagepath!).readAsBytes().asStream(),
+            File(widget.imagepath!).lengthSync(),
+            filename: File(widget.imagepath!).path.split('/').last,
           ));
         // Tambahkan data atau file yang ingin diunggah
         // request.files.add(http.MultipartFile.fromBytes('file', await File('path/to/file').readAsBytes(), filename: 'filename.jpg'));
@@ -153,7 +138,6 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
   @override
   void initState() {
     super.initState();
-    _takePicture();
   }
 
   @override
@@ -164,7 +148,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
           'Upload Document',
           style: TextStyle(color: whiteColor),
         ),
-        backgroundColor: Colors.blueGrey[900],
+        backgroundColor: primaryColor,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -175,24 +159,24 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
               onPressed: _pickPdf,
               child: Text('Pick PDF', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey[900],
+                primary: primaryColor,
               ),
             ),
             _pdfFile != null
                 ? Text(_pdfFile!.path.split('/').last)
                 : SizedBox(height: 20.0),
             SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _takePicture,
-              child:
-                  Text('Take Picture', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey[900],
-              ),
-            ),
-            _imageFile != null
+            // ElevatedButton(
+            //   onPressed: _takePicture,
+            //   child:
+            //       Text('Take Picture', style: TextStyle(color: Colors.white)),
+            //   style: ElevatedButton.styleFrom(
+            //     primary: Colors.blueGrey[900],
+            //   ),
+            // ),
+            widget.imagepath != null
                 ? Image.file(
-                    _imageFile!,
+                    File(widget.imagepath!),
                     height: 200.0,
                     fit: BoxFit.cover,
                   )
@@ -211,6 +195,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
             ),
             SizedBox(height: 10.0),
             TextField(
+              enabled: false,
               onChanged: (value) {
                 setState(() {
                   _nip = value;
@@ -222,14 +207,14 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
               ),
             ),
             SizedBox(height: 10.0),
-            Text('Server Time: $_serverTime'),
+            // Text('Server Time: $_serverTime'),
             SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: _uploadDocument,
               child: Text('Upload Document',
                   style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey[900],
+                primary: primaryColor,
               ),
             ),
           ],

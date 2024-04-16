@@ -18,7 +18,7 @@ class SignInSheet extends StatelessWidget {
   Future _signIn(context, user) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("nip", user.nip);
-    preferences.setString("nip", user.nip);
+    
     preferences.setString("path", _cameraService.imagePath!);
     if (user.password == _passwordController.text) {
       preferences.setBool("login", true);
