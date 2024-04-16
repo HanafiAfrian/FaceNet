@@ -128,7 +128,9 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 32,
               ),
-              _InformationsComponent(namalengkap),
+              InformationsComponent(
+                username: namalengkap,
+              ),
               SizedBox(
                 height: 40,
               ),
@@ -418,12 +420,13 @@ class _LogoutAlertComponent extends StatelessWidget {
   }
 }
 
-class _InformationsComponent extends StatelessWidget {
+class InformationsComponent extends StatelessWidget {
   String? username;
-  _InformationsComponent(username);
 
+  InformationsComponent({super.key, this.username});
   @override
   Widget build(BuildContext context) {
+    print("datausernameandaadalah : $username");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
