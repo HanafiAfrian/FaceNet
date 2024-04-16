@@ -1,8 +1,7 @@
 class Constants {
   static String githubURL =
       "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
-  static String BASEURL =
-      "https://siponcan.disdukcapilsibolga.id/api/presensi/";
+  static String BASEURL = "https://sisensio.unand.ac.id/presensi/";
   static String REGISTER = "register.php";
   static String HISTORIABSENSI = "historiabsensi.php";
   static String ABSENSI = "absensi.php";
