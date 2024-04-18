@@ -1,4 +1,4 @@
-import 'package:face_net_authentication/constants/constants.dart';
+import 'package:face_net_authentication/pages/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,10 +10,10 @@ import 'package:face_net_authentication/pages/widgets/app_text_field.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-// import 'package:trust_location/trust_location.dart';
+import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
-import '../main_screen.dart';
+import '../../constants/constants.dart';
 
 class PresensiAuthSheet extends StatefulWidget {
   PresensiAuthSheet({Key? key, required this.user}) : super(key: key);
@@ -35,12 +35,12 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
   @override
   void initState() {
     super.initState();
-    // getLocationPermissionsAndStart();
+    getLocationPermissionsAndStart();
   }
 
   Future<void> getLocationPermissionsAndStart() async {
     await requestLocationPermission();
-    // TrustLocation.start(5);
+    TrustLocation.start(5);
     getLocation();
   }
 
@@ -75,26 +75,26 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
   }
 
   Future<void> getLocation() async {
-    // try {
-    //   TrustLocation.onChange.listen((values) {
-    //     setState(() {
-    //       _latitude = values.latitude?.toString() ?? "N/A";
-    //       _longitude = values.longitude?.toString() ?? "N/A";
-    //       _isMockLocation = values.isMockLocation ?? false;
-    //       _currentLocation = LatLng(
-    //         double.tryParse(_latitude) ?? 0.0,
-    //         double.tryParse(_longitude) ?? 0.0,
-    //       );
-    //     });
-    //   });
-    // } on PlatformException catch (e) {
-    //   print('PlatformException: $e');
-    // } catch (e) {
-    //   print('Error: $e');
-    // }
+    try {
+      TrustLocation.onChange.listen((values) {
+        setState(() {
+          _latitude = values.latitude?.toString() ?? "N/A";
+          _longitude = values.longitude?.toString() ?? "N/A";
+          _isMockLocation = values.isMockLocation ?? false;
+          _currentLocation = LatLng(
+            double.tryParse(_latitude) ?? 0.0,
+            double.tryParse(_longitude) ?? 0.0,
+          );
+        });
+      });
+    } on PlatformException catch (e) {
+      print('PlatformException: $e');
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
-  Future<void> _presensiAuth(BuildContext context, User user) async {
+  Future<void> _presensiIn(BuildContext context, User user) async {
     if (_isMockLocation) {
       showDialog(
         context: context,
@@ -142,12 +142,14 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
             );
           } else if (trimmedResponse == 'true') {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => MainScreen(
-                          imagePath: _cameraService.imagePath,
-                          username: user.nip,
-                        )));
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => MainScreen(
+                  username: user.nip,
+                  imagePath: _cameraService.imagePath!,
+                ),
+              ),
+            );
           } else {
             showDialog(
               context: context,
@@ -236,7 +238,7 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
                 AppButton(
                   text: 'LOGIN',
                   onPressed: () async {
-                    await _presensiAuth(context, widget.user);
+                    await _presensiIn(context, widget.user);
                   },
                   icon: Icon(
                     Icons.login,

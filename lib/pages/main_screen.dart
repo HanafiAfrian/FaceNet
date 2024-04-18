@@ -58,6 +58,7 @@ class _MainScreenState extends State<MainScreen> {
                     DashboardView(
                       username: nip,
                       imagePath: path,
+                      context: context,
                     ),
                     PresenceView(),
                   ],

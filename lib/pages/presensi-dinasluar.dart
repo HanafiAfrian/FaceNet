@@ -136,11 +136,8 @@ class PresensiDinasLuarState extends State<PresensiDinasLuar> {
             style: TextStyle(fontSize: 20),
           ),
         )
-      : Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => DinasLuarPage(
-                    nip: user.nip,
-                    imagepath: _cameraService.imagePath,
-                  )));
+      : DinasLuarPage(
+          nip: user.nip,
+          imagepath: _cameraService.imagePath,
+        );
 }

@@ -189,7 +189,9 @@ class UserPresenceComponent extends StatelessWidget {
     } else {
       print("Waktu absen masuk tidak tersedia.");
     }
-    if (absentTimePulang != null && absentTimePulang != "") {
+    if (absentTimePulang != null &&
+        absentTimePulang != "" &&
+        absentTimePulang != "0") {
       DateTime parsedTimePulang =
           DateFormat('HH:mm:ss').parse(absentTimePulang!);
 // Formatting objek DateTime ke format yang diinginkan dengan AM/PM

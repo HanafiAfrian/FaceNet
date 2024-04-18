@@ -1,7 +1,5 @@
-import 'dart:io';
-
+import 'package:face_net_authentication/pages/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:face_net_authentication/locator.dart';
@@ -11,14 +9,11 @@ import 'package:face_net_authentication/pages/widgets/app_button.dart';
 import 'package:face_net_authentication/pages/widgets/app_text_field.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'dart:async';
-
-import 'package:geolocator/geolocator.dart' as geoloc;
 import 'package:flutter/services.dart';
-// import 'package:trust_location/trust_location.dart';
+import 'package:trust_location/trust_location.dart';
 import 'package:location_permissions/location_permissions.dart';
 
 import '../../constants/constants.dart';
-import '../main_screen.dart';
 
 class PresensiInSheet extends StatefulWidget {
   PresensiInSheet({Key? key, required this.user}) : super(key: key);
@@ -31,9 +26,8 @@ class PresensiInSheet extends StatefulWidget {
 class _PresensiInSheetState extends State<PresensiInSheet> {
   final _passwordController = TextEditingController();
   final _cameraService = locator<CameraService>();
-  String _latitude = "unkwonw";
-  String _longitude = "unknown";
-
+  String _latitude = "Loading...";
+  String _longitude = "Loading...";
   bool _isMockLocation = false;
   late GoogleMapController mapController;
   LatLng? _currentLocation;
@@ -41,139 +35,13 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
   @override
   void initState() {
     super.initState();
-    _getLocation();
-    // getLocationPermissionsAndStart();
-  }
-
-  Future<void> _getLocation() async {
-    bool serviceEnabled;
-    geoloc.LocationPermission permission;
-
-    // Memeriksa apakah layanan lokasi diaktifkan
-    serviceEnabled = await geoloc.Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _showLocationServiceAlertDialog();
-      return;
-    }
-
-    // Memeriksa izin lokasi
-    permission = await geoloc.Geolocator.checkPermission();
-    if (permission == geoloc.LocationPermission.deniedForever) {
-      // Izin ditolak secara permanen, arahkan pengguna ke pengaturan
-      _showPermissionDeniedDialog();
-      return;
-    }
-
-    if (permission == geoloc.LocationPermission.denied) {
-      // Izin tidak diberikan, minta izin
-      permission = await geoloc.Geolocator.requestPermission();
-      if (permission != geoloc.LocationPermission.whileInUse &&
-          permission != geoloc.LocationPermission.always) {
-        // Izin tidak diberikan oleh pengguna, keluar dari fungsi
-        return;
-      }
-    }
-
-    // Izin diberikan, dapatkan lokasi terbaru
-    try {
-      geoloc.Position position = await geoloc.Geolocator.getCurrentPosition(
-          desiredAccuracy: geoloc.LocationAccuracy.high);
-      setState(() {
-        _latitude = position.latitude.toString();
-        _longitude = position.longitude.toString();
-      });
-    } catch (e) {
-      print('Error: $e');
-    }
+    getLocationPermissionsAndStart();
   }
 
   Future<void> getLocationPermissionsAndStart() async {
-    bool isFakeLocation = await isFakeGPS();
-    if (isFakeLocation) {
-      _fakeGPS(context);
-    }
     await requestLocationPermission();
-    // TrustLocation.start(5);
+    TrustLocation.start(5);
     getLocation();
-  }
-
-  void _showLocationServiceAlertDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Layanan Lokasi Tidak Aktif'),
-          content: Text(
-              'Layanan lokasi tidak diaktifkan pada perangkat Anda. Silakan aktifkan layanan lokasi.'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showPermissionDeniedDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Izin Lokasi Ditolak'),
-          content: Text(
-              'Izin lokasi telah ditolak secara permanen. Buka pengaturan aplikasi untuk mengaktifkannya.'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _fakeGPS(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('PERHATIAN !!!'),
-          content: Text(
-            'Tampaknya anda menggunakan GPS palsu. saat menggunakan GPS palsu anda tidak akan dapat melakukan Absensi',
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Mengerti'),
-              onPressed: () {
-                SystemNavigator.pop(); // Menutup aplikasi
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<bool> isFakeGPS() async {
-    if (Platform.isAndroid) {
-      await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      // bool isMockLocation = await TrustLocation.isMockLocation;
-      bool isMockLocation = false;
-      return isMockLocation;
-    } else {
-      return false;
-    }
   }
 
   Future<void> requestLocationPermission() async {
@@ -207,23 +75,23 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
   }
 
   Future<void> getLocation() async {
-    // try {
-    //   TrustLocation.onChange.listen((values) {
-    //     setState(() {
-    //       _latitude = values.latitude?.toString() ?? "N/A";
-    //       _longitude = values.longitude?.toString() ?? "N/A";
-    //       _isMockLocation = values.isMockLocation ?? false;
-    //       _currentLocation = LatLng(
-    //         double.tryParse(_latitude) ?? 0.0,
-    //         double.tryParse(_longitude) ?? 0.0,
-    //       );
-    //     });
-    //   });
-    // } on PlatformException catch (e) {
-    //   print('PlatformException: $e');
-    // } catch (e) {
-    //   print('Error: $e');
-    // }
+    try {
+      TrustLocation.onChange.listen((values) {
+        setState(() {
+          _latitude = values.latitude?.toString() ?? "N/A";
+          _longitude = values.longitude?.toString() ?? "N/A";
+          _isMockLocation = values.isMockLocation ?? false;
+          _currentLocation = LatLng(
+            double.tryParse(_latitude) ?? 0.0,
+            double.tryParse(_longitude) ?? 0.0,
+          );
+        });
+      });
+    } on PlatformException catch (e) {
+      print('PlatformException: $e');
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   Future<void> _presensiIn(BuildContext context, User user) async {
@@ -256,8 +124,8 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
             'nip': user.nip,
             'nama': user.user,
             'jenis_absensi': 'Masuk',
-            'latitude': _latitude ?? '',
-            'longitude': _longitude ?? '',
+            'latitude': _currentLocation?.latitude.toString() ?? '',
+            'longitude': _currentLocation?.longitude.toString() ?? '',
           },
         );
 
@@ -274,12 +142,14 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
             );
           } else if (trimmedResponse == 'true') {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => MainScreen(
-                          imagePath: _cameraService.imagePath,
-                          username: user.nip,
-                        )));
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => MainScreen(
+                  username: user.nip,
+                  imagePath: _cameraService.imagePath!,
+                ),
+              ),
+            );
           } else {
             showDialog(
               context: context,
@@ -359,10 +229,8 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
                       mapController = controller;
                     },
                     initialCameraPosition: CameraPosition(
-                      target: _currentLocation ??
-                          LatLng(double.parse(_latitude),
-                              double.parse(_longitude)),
-                      zoom: 19.0,
+                      target: _currentLocation ?? LatLng(0, 0),
+                      zoom: 15.0,
                     ),
                   ),
                 ),

@@ -90,7 +90,7 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
         var url = Uri.parse(Constants.BASEURL + Constants.UPLOADDINAS);
         var request = http.MultipartRequest('POST', url)
           ..fields['no_tugas'] = _taskNumber
-          ..fields['nip'] = _nip
+          ..fields['nip'] = widget.nip!
           // ..fields['waktu'] = _serverTime
           ..files.add(http.MultipartFile(
             'pdf_document',
@@ -114,7 +114,8 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
         if (response.statusCode == 200) {
           // Tanggapi respons jika berhasil
           print('Data berhasil diunggah');
-          Navigator.pop(context);
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
         } else {
           // Tanggapi kesalahan jika ada
           print('Gagal mengunggah data. Kode status: ${response.statusCode}');
@@ -142,83 +143,74 @@ class _DinasLuarPageState extends State<DinasLuarPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Upload Document',
-          style: TextStyle(color: whiteColor),
-        ),
-        backgroundColor: primaryColor,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: _pickPdf,
-              child: Text('Pick PDF', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                primary: primaryColor,
-              ),
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          ElevatedButton(
+            onPressed: _pickPdf,
+            child: Text('Pick PDF', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              primary: primaryColor,
             ),
-            _pdfFile != null
-                ? Text(_pdfFile!.path.split('/').last)
-                : SizedBox(height: 20.0),
-            SizedBox(height: 20.0),
-            // ElevatedButton(
-            //   onPressed: _takePicture,
-            //   child:
-            //       Text('Take Picture', style: TextStyle(color: Colors.white)),
-            //   style: ElevatedButton.styleFrom(
-            //     primary: Colors.blueGrey[900],
-            //   ),
-            // ),
-            widget.imagepath != null
-                ? Image.file(
-                    File(widget.imagepath!),
-                    height: 200.0,
-                    fit: BoxFit.cover,
-                  )
-                : SizedBox(height: 200.0),
-            SizedBox(height: 20.0),
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  _taskNumber = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'Task Number',
-                border: OutlineInputBorder(),
-              ),
+          ),
+          _pdfFile != null
+              ? Text(_pdfFile!.path.split('/').last)
+              : SizedBox(height: 20.0),
+          SizedBox(height: 20.0),
+          // ElevatedButton(
+          //   onPressed: _takePicture,
+          //   child:
+          //       Text('Take Picture', style: TextStyle(color: Colors.white)),
+          //   style: ElevatedButton.styleFrom(
+          //     primary: Colors.blueGrey[900],
+          //   ),
+          // ),
+          widget.imagepath != null
+              ? Image.file(
+                  File(widget.imagepath!),
+                  height: 200.0,
+                  fit: BoxFit.cover,
+                )
+              : SizedBox(height: 200.0),
+          SizedBox(height: 20.0),
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                _taskNumber = value;
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'Task Number',
+              border: OutlineInputBorder(),
             ),
-            SizedBox(height: 10.0),
-            TextField(
-              enabled: false,
-              onChanged: (value) {
-                setState(() {
-                  _nip = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'NIP',
-                border: OutlineInputBorder(),
-              ),
+          ),
+          SizedBox(height: 10.0),
+          TextField(
+            enabled: false,
+            onChanged: (value) {
+              setState(() {
+                _nip = value;
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'NIP',
+              border: OutlineInputBorder(),
             ),
-            SizedBox(height: 10.0),
-            // Text('Server Time: $_serverTime'),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: _uploadDocument,
-              child: Text('Upload Document',
-                  style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                primary: primaryColor,
-              ),
+          ),
+          SizedBox(height: 10.0),
+          // Text('Server Time: $_serverTime'),
+          SizedBox(height: 20.0),
+          ElevatedButton(
+            onPressed: _uploadDocument,
+            child:
+                Text('Upload Document', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              primary: primaryColor,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

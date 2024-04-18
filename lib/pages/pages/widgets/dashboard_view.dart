@@ -29,10 +29,12 @@ import '../dinasluar.dart';
 import 'presence_view.dart';
 
 class DashboardView extends StatefulWidget {
-  DashboardView({this.username, Key? key, this.imagePath}) : super(key: key);
+  DashboardView({this.username, Key? key, this.imagePath, context})
+      : super(key: key);
 
   String? username;
   String? imagePath;
+  BuildContext? context;
   @override
   State<DashboardView> createState() => _DashboardViewState();
 }
@@ -134,7 +136,7 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 40,
               ),
-              MenuActivityComponent(usernamee, widget.imagePath),
+              MenuActivityComponent(usernamee, widget.imagePath,widget.context),
               SizedBox(
                 height: 20,
               ),
@@ -290,33 +292,17 @@ class _HeaderDashboardComponent extends StatelessWidget {
         Spacer(
           flex: 1,
         ),
-        Container(
-          width: 38,
-          height: 38,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary: maroonColor,
-              elevation: 0,
-              onPrimary: Colors.black.withOpacity(0.3),
-              visualDensity: VisualDensity.comfortable,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              showAlert(
-                context,
-                alert: _LogoutAlertComponent(),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/images/ic_logout.png',
-                width: 18,
-                height: 18,
-              ),
-            ),
+        InkWell(
+          onTap: () {
+            showAlert(
+              context,
+              alert: _LogoutAlertComponent(),
+            );
+          },
+          child: Image.asset(
+            'assets/images/ic_logout.png',
+            width: 58,
+            height: 38,
           ),
         ),
         SizedBox(
@@ -404,6 +390,13 @@ class _LogoutAlertComponent extends StatelessWidget {
                       // await AuthServices.logOut();
                       // Navigator.pushReplacementNamed(
                       //     context, Wrapper.routeName);
+                      SharedPreferences preferences =
+                          await SharedPreferences.getInstance();
+                      preferences.clear();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyHomePage()),
+                      );
                     },
                     child: Text(
                       "Logout",
@@ -506,7 +499,7 @@ class _PresenceInfoComponent extends StatelessWidget {
 }
 
 class MenuActivityComponent extends StatefulWidget {
-  MenuActivityComponent(usernamee, imagePathh);
+  MenuActivityComponent(usernamee, imagePathh,context);
 
   @override
   State<MenuActivityComponent> createState() => _MenuActivityComponentState();
