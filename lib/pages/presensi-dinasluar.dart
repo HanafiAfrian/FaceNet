@@ -162,7 +162,7 @@ class PresensiDinasLuarState extends State<PresensiDinasLuar> {
 
   @override
   Widget build(BuildContext context) {
-    Widget header = CameraHeader(cekwajah == true ? "Preview Wajah" : "Login",
+    Widget header = CameraHeader(cekwajah == true ? "Preview Wajah" : "PRESENSI DINAS LUAR",
         onBackPressed: _onBackPressed);
     Widget body = getBodyWidget();
     Widget? fab;
