@@ -161,7 +161,7 @@ class PresensiAuthState extends State<PresensiAuth> {
 
   @override
   Widget build(BuildContext context) {
-    Widget header = CameraHeader(cekwajah == true ? "Preview Wajah" : "Login",
+    Widget header = CameraHeader(cekwajah == true ? "Preview Wajah" : "PRESENSI PULANG",
         onBackPressed: _onBackPressed);
     Widget body = getBodyWidget();
     Widget? fab;
