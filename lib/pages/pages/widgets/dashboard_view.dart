@@ -136,7 +136,8 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 40,
               ),
-              MenuActivityComponent(usernamee, widget.imagePath,widget.context),
+              MenuActivityComponent(
+                  usernamee, widget.imagePath, widget.context),
               SizedBox(
                 height: 20,
               ),
@@ -155,20 +156,20 @@ class _DashboardViewState extends State<DashboardView> {
               SizedBox(
                 height: 95,
               ),
-              AppButton(
-                text: "LOG OUT",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyHomePage()),
-                  );
-                },
-                icon: Icon(
-                  Icons.logout,
-                  color: Colors.white,
-                ),
-                color: Color(0xFFFF6161),
-              ),
+              // AppButton(
+              //   text: "LOG OUT",
+              //   onPressed: () {
+              //     Navigator.push(
+              //       context,
+              //       MaterialPageRoute(builder: (context) => MyHomePage()),
+              //     );
+              //   },
+              //   icon: Icon(
+              //     Icons.logout,
+              //     color: Colors.white,
+              //   ),
+              //   color: Color(0xFFFF6161),
+              // ),
               SizedBox(
                 height: 120,
               )
@@ -390,12 +391,17 @@ class _LogoutAlertComponent extends StatelessWidget {
                       // await AuthServices.logOut();
                       // Navigator.pushReplacementNamed(
                       //     context, Wrapper.routeName);
+                      // Navigator.of(context).popUntil((route) => route.isFirst);
                       SharedPreferences preferences =
                           await SharedPreferences.getInstance();
-                      preferences.clear();
-                      Navigator.push(
+                      preferences.remove("nip");
+                      preferences.remove("path");
+                      preferences.remove("login");
+                      Navigator.pop(context);
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => MyHomePage()),
+                        (route) => route.isFirst,
                       );
                     },
                     child: Text(
@@ -499,7 +505,7 @@ class _PresenceInfoComponent extends StatelessWidget {
 }
 
 class MenuActivityComponent extends StatefulWidget {
-  MenuActivityComponent(usernamee, imagePathh,context);
+  MenuActivityComponent(usernamee, imagePathh, context);
 
   @override
   State<MenuActivityComponent> createState() => _MenuActivityComponentState();

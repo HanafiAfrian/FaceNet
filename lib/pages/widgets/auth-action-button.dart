@@ -66,7 +66,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     this._mlService.setPredictedData([]);
 
     // Navigasi ke MyHomePage setelah sign-up berhasil
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
     );
