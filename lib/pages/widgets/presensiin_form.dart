@@ -278,67 +278,71 @@ class _PresensiInSheetState extends State<PresensiInSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            child: Text(
-              'Selamat Datang, ' + widget.user.nip + '.',
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-          Container(
+    return _latitude != null && _longitude != null
+        ? Container(
+            padding: EdgeInsets.all(20),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(height: 10),
-                AppTextField(
-                  controller: _passwordController,
-                  labelText: "Password",
-                  isPassword: true,
-                ),
-                SizedBox(height: 10),
-                Divider(),
-                SizedBox(height: 10),
-                Text('lokasi palsu $_isMockLocation'),
-                SizedBox(height: 10),
-                Text('Latitude: $_latitude, Longitude: $_longitude'),
-                SizedBox(height: 10),
                 Container(
-                  height: 200,
-                  child: GoogleMap(
-                    onMapCreated: (GoogleMapController controller) {
-                      mapController = controller;
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: _currentLocation ??
-                          LatLng(
-                              double.parse(
-                                  _latitude ?? "${_currentLocation?.latitude}"),
-                              double.parse(_longitude ??
-                                  "${_currentLocation?.longitude}")),
-                      zoom: 15.0,
-                    ),
+                  child: Text(
+                    'Selamat Datang, ' + widget.user.nip + '.',
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
-                SizedBox(height: 10),
-                AppButton(
-                  text: 'LOGIN',
-                  onPressed: () async {
-                    await _presensiIn(context, widget.user);
-                  },
-                  icon: Icon(
-                    Icons.login,
-                    color: Colors.white,
+                Container(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      AppTextField(
+                        controller: _passwordController,
+                        labelText: "Password",
+                        isPassword: true,
+                      ),
+                      SizedBox(height: 10),
+                      Divider(),
+                      SizedBox(height: 10),
+                      Text('lokasi palsu $_isMockLocation'),
+                      SizedBox(height: 10),
+                      Text('Latitude: $_latitude, Longitude: $_longitude'),
+                      SizedBox(height: 10),
+                      Container(
+                        height: 200,
+                        child: GoogleMap(
+                          onMapCreated: (GoogleMapController controller) {
+                            mapController = controller;
+                          },
+                          initialCameraPosition: CameraPosition(
+                            target: _currentLocation ??
+                                LatLng(
+                                    double.parse(_latitude ??
+                                        "${_currentLocation?.latitude}"),
+                                    double.parse(_longitude ??
+                                        "${_currentLocation?.longitude}")),
+                            zoom: 15.0,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      AppButton(
+                        text: 'LOGIN',
+                        onPressed: () async {
+                          await _presensiIn(context, widget.user);
+                        },
+                        icon: Icon(
+                          Icons.login,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        : Center(
+            child: SingleChildScrollView(),
+          );
   }
 }
