@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:face_net_authentication/locator.dart';
 import 'package:face_net_authentication/pages/widgets/FacePainter.dart';
 import 'package:face_net_authentication/pages/widgets/auth-action-button.dart';
+import 'package:face_net_authentication/pages/widgets/auth-action-button2.dart';
 import 'package:face_net_authentication/pages/widgets/camera_header.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
@@ -17,14 +18,16 @@ import 'package:toast/toast.dart';
 
 import '../constants/constants.dart';
 
-class SignUp extends StatefulWidget {
-  const SignUp({Key? key}) : super(key: key);
+class SignUp2 extends StatefulWidget {
+  String? nip, username, password, role;
+  SignUp2({Key? key, this.nip, this.username, this.password, this.role})
+      : super(key: key);
 
   @override
-  SignUpState createState() => SignUpState();
+  SignUp2State createState() => SignUp2State();
 }
 
-class SignUpState extends State<SignUp> {
+class SignUp2State extends State<SignUp2> {
   String? imagePath;
   Face? faceDetected;
   Size? imageSize;
@@ -56,15 +59,15 @@ class SignUpState extends State<SignUp> {
     _mlKitService.initialize();
   }
 
-  @override
-  void dispose() {
-    _cameraService.dispose();
-    _mlService.dispose();
-    _faceDetectorService.dispose();
-    _cameraService.cameraController!.dispose();
+  // @override
+  // void dispose() {
+  //   _cameraService.dispose();
+  //   _mlService.dispose();
+  //   _faceDetectorService.dispose();
+  //   _cameraService.cameraController!.dispose();
 
-    super.dispose();
-  }
+  //   super.dispose();
+  // }
 
   _start() async {
     setState(() => _initializing = true);
@@ -260,14 +263,18 @@ class SignUpState extends State<SignUp> {
           children: [
             body,
             CameraHeader(
-              "SIGN UP 1",
+              "SIGN UP 2",
               onBackPressed: _onBackPressed,
             )
           ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: !_bottomSheetVisible
-            ? AuthActionButton(
+            ? AuthActionButton2(
+                nip: widget.nip,
+                username: widget.username,
+                password: widget.password,
+                role: widget.role,
                 context: context,
                 onPressed: onShot,
                 isLogin: false,

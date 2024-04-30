@@ -4,6 +4,7 @@ import 'package:face_net_authentication/pages/models/user.model.dart';
 import 'package:face_net_authentication/pages/profile.dart';
 import 'package:face_net_authentication/pages/sign-up.dart';
 import 'package:face_net_authentication/pages/sign-up2.dart';
+import 'package:face_net_authentication/pages/sign-up3.dart';
 import 'package:face_net_authentication/pages/widgets/app_button.dart';
 import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
@@ -17,9 +18,14 @@ import '../main_screen.dart';
 import 'app_text_field.dart';
 import 'package:http/http.dart' as http;
 
-class AuthActionButton extends StatefulWidget {
-  AuthActionButton(
+class AuthActionButton2 extends StatefulWidget {
+  String? nip, username, password, role;
+  AuthActionButton2(
       {Key? key,
+      this.nip,
+      this.username,
+      this.password,
+      this.role,
       required this.onPressed,
       required this.isLogin,
       required this.isAbsenmasuk,
@@ -35,10 +41,10 @@ class AuthActionButton extends StatefulWidget {
   final bool isAbsenkeluar;
   final Function reload;
   @override
-  _AuthActionButtonState createState() => _AuthActionButtonState();
+  _AuthActionButton2State createState() => _AuthActionButton2State();
 }
 
-class _AuthActionButtonState extends State<AuthActionButton> {
+class _AuthActionButton2State extends State<AuthActionButton2> {
   PersistentBottomSheetController? _bottomSheetController;
   final MLService _mlService = locator<MLService>();
   final CameraService _cameraService = locator<CameraService>();
@@ -51,19 +57,15 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       TextEditingController(text: '');
   String selectedRole = 'Pilih Role'; // Default role selection
   User? predictedUser;
-  int signUpCount = 0;
 
   Future _signUp(context) async {
     DatabaseHelper _databaseHelper = DatabaseHelper.instance;
     List predictedData = _mlService.predictedData;
-    String nip = _nipTextEditingController.text;
-    signUpCount++;
-    String user = _userTextEditingController.text;
-    String password = _passwordTextEditingController.text;
+
     User userToSave = User(
-      nip: nip,
-      user: user,
-      password: password,
+      nip: widget.nip!,
+      user: widget.username!,
+      password: widget.password!,
       modelData: predictedData,
     );
     await _databaseHelper.insert(userToSave);
@@ -72,16 +74,10 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     this._mlService.setPredictedData([]);
 
     // Navigasi ke MyHomePage setelah sign-up berhasil
-    if (signUpCount == 3) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
-      );
-    }
 
     // Mengirim data ke server setelah menghapus data prediksi
-    await _sendDataToServer(nip, user, password, selectedRole, predictedData,
-        _cameraService.imagePath);
+    await _sendDataToServer(widget.nip!, widget.username!, widget.password!,
+        widget.role!, predictedData, _cameraService.imagePath);
   }
 
   Future<void> _sendDataToServer(String nip, String user, String password,
@@ -113,7 +109,13 @@ class _AuthActionButtonState extends State<AuthActionButton> {
       Navigator.pop(widget.context);
       Navigator.push(
         widget.context,
-        MaterialPageRoute(builder: (BuildContext context) => SignUp2(nip: nip,username: user,password: password,role: selectedRole,)),
+        MaterialPageRoute(
+            builder: (BuildContext context) => SignUp3(
+                  nip: nip,
+                  username: user,
+                  password: password,
+                  role: selectedRole,
+                )),
       );
     } else {
       // Gagal mengunggah file
@@ -393,100 +395,6 @@ class _AuthActionButtonState extends State<AuthActionButton> {
                       Container(
                         child: Column(
                           children: [
-                            !widget.isLogin
-                                ? Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: Colors.black),
-                                          children: [
-                                            TextSpan(
-                                                text: 'PNS',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black)),
-                                            TextSpan(
-                                                text: ' gunakan ',
-                                                style: TextStyle(
-                                                    color: Colors.white)),
-                                            TextSpan(
-                                                text: 'NIP',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black)),
-                                            TextSpan(text: ', '),
-                                            TextSpan(
-                                                text: 'Non PNS',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors
-                                                        .yellow.shade800)),
-                                            TextSpan(
-                                                text: ' gunakan ',
-                                                style: TextStyle(
-                                                    color: Colors.white)),
-                                            TextSpan(
-                                                text: 'NIKU',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors
-                                                        .yellow.shade800)),
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                          height:
-                                              8), // Jarak antara teks di atas dan AppTextField
-                                      AppTextField(
-                                        controller: _nipTextEditingController,
-                                        labelText: "Masukkan NIP/NIKU",
-                                      ),
-                                    ],
-                                  )
-                                : Container(),
-                            SizedBox(height: 10),
-                            DropdownButton<String>(
-                              value: selectedRole,
-                              dropdownColor: Colors.green,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedRole = newValue!;
-                                });
-                              },
-                              items: <String>[
-                                'Pilih Role',
-                                'Dosen',
-                                'Tendik'
-                              ].map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(
-                                    value,
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 10),
-                            !widget.isLogin
-                                ? AppTextField(
-                                    controller: _userTextEditingController,
-                                    labelText: "Nama Lengkap",
-                                  )
-                                : Container(),
-                            SizedBox(height: 10),
-                            widget.isLogin && predictedUser == null
-                                ? Container()
-                                : AppTextField(
-                                    controller: _passwordTextEditingController,
-                                    labelText: "Password",
-                                    isPassword: true,
-                                  ),
-                            SizedBox(height: 10),
                             SizedBox(height: 10),
                             widget.isLogin && predictedUser != null
                                 ? AppButton(
@@ -537,44 +445,15 @@ class _AuthActionButtonState extends State<AuthActionButton> {
                                                     color: Colors.grey.shade600,
                                                     text: 'SIGN UP',
                                                     onPressed: () async {
-                                                      if (selectedRole ==
-                                                          'Pilih Role') {
-                                                        // Menampilkan alert jika pengguna tidak memilih role
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return AlertDialog(
-                                                              title: Text(
-                                                                  'Peringatan'),
-                                                              content: Text(
-                                                                  'Silakan pilih role terlebih dahulu.'),
-                                                              actions: <Widget>[
-                                                                TextButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                  },
-                                                                  child: Text(
-                                                                      'OK'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                        return; // Hentikan eksekusi selanjutnya jika role tidak dipilih
-                                                      } else {
-                                                        SharedPreferences
-                                                            preferences =
-                                                            await SharedPreferences
-                                                                .getInstance();
-                                                        preferences.setString(
-                                                            "namalengkap",
-                                                            _userTextEditingController
-                                                                .text);
-                                                        await _signUp(context);
-                                                      }
+                                                      SharedPreferences
+                                                          preferences =
+                                                          await SharedPreferences
+                                                              .getInstance();
+                                                      preferences.setString(
+                                                          "namalengkap",
+                                                          _userTextEditingController
+                                                              .text);
+                                                      await _signUp(context);
                                                     },
                                                     icon: Icon(
                                                       Icons.person_add,
