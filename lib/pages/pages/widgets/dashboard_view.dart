@@ -228,6 +228,7 @@ class _DashboardViewState extends State<DashboardView> {
                           padding: const EdgeInsets.all(20.0),
                           child: ListView.builder(
                             shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
                             itemCount: _showMore
                                 ? historiPresensi?.length
                                 : (historiPresensi!.length > 5

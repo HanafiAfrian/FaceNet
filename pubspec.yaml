@@ -55,6 +55,7 @@ dependencies:
   geolocator: ^11.0.0
   modal_progress_hud_nsn: ^0.5.1
   trust_location: ^2.0.13
+  connectivity_plus: ^6.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

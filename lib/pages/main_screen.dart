@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,13 +25,50 @@ class _MainScreenState extends State<MainScreen> {
   String? nip;
 
   String? path;
-
+  StreamSubscription<List<ConnectivityResult>>? subscription;
   @override
   void initState() {
     super.initState();
-   
+
     bottomNavBarIndex = 0;
     pageController = PageController(initialPage: bottomNavBarIndex!);
+    // initConnectivity();
+
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) {
+      // Received changes in available connectivity types!
+      setState(() {
+        // Handle connection change
+        // You can perform any action here, such as showing a dialog or updating UI
+        // For simplicity, I'm just printing the result
+        print("Connection Status Changed: $result");
+        initConnectivity();
+      });
+    });
+  }
+
+  Future<void> initConnectivity() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    showConnectivitySnackBar(connectivityResult);
+  }
+
+  void showConnectivitySnackBar(List<ConnectivityResult> result) {
+    String message = '';
+    Color backgroundColor =
+        Colors.green; // default color for internet available
+    if (result.contains(ConnectivityResult.none)) {
+      message = 'Tidak ada koneksi internet.';
+      backgroundColor = Colors.red;
+    } else if (result.contains(ConnectivityResult.mobile) ||
+        result.contains(ConnectivityResult.wifi)) {
+      message = 'Koneksi internet tersedia.';
+    }
+    final snackBar = SnackBar(
+      content: Text(message),
+      backgroundColor: backgroundColor,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -136,6 +176,4 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
- 
 }
