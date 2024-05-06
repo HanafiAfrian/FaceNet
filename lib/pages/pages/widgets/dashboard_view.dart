@@ -396,7 +396,7 @@ class _LogoutAlertComponent extends StatelessWidget {
                       SharedPreferences preferences =
                           await SharedPreferences.getInstance();
                       preferences.remove("nip");
-                      preferences.remove("path");
+                      // preferences.remove("path");
                       preferences.remove("login");
                       Navigator.pop(context);
                       Navigator.pushAndRemoveUntil(
