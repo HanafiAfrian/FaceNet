@@ -25,7 +25,6 @@ class PresensiAuthSheet extends StatefulWidget {
 }
 
 class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
-  final _passwordController = TextEditingController();
   final _cameraService = locator<CameraService>();
   String _latitude = "Loading...";
   String _longitude = "Loading...";
@@ -197,79 +196,69 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
           );
         },
       );
-    } else if (user.password == _passwordController.text) {
-      try {
-        final response = await http.post(
-          Uri.parse(Constants.BASEURL + Constants.ABSENSIKELUAR),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: {
-            'nip': user.nip,
-            'nama': user.user,
-            'jenis_absensi': 'Keluar',
-            'latitude': _currentLocation?.latitude.toString() ?? '',
-            'longitude': _currentLocation?.longitude.toString() ?? '',
-          },
-        );
+    }
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.ABSENSIKELUAR),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'nip': user.nip,
+          'nama': user.user,
+          'jenis_absensi': 'Keluar',
+          'latitude': _currentLocation?.latitude.toString() ?? '',
+          'longitude': _currentLocation?.longitude.toString() ?? '',
+        },
+      );
 
-        if (response.statusCode == 200) {
-          final trimmedResponse = response.body.trim().toLowerCase();
-          if (trimmedResponse == 'false') {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  content: Text('Anda berada di luar area presensi.'),
-                );
-              },
-            );
-          } else if (trimmedResponse == 'true') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => MainScreen(
-                  username: user.nip,
-                  imagePath: _cameraService.imagePath!,
-                ),
+      if (response.statusCode == 200) {
+        final trimmedResponse = response.body.trim().toLowerCase();
+        if (trimmedResponse == 'false') {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text('Anda berada di luar area presensi.'),
+              );
+            },
+          );
+        } else if (trimmedResponse == 'true') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => MainScreen(
+                username: user.nip,
+                imagePath: _cameraService.imagePath!,
               ),
-            );
-          } else {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  content: Text('Invalid server response.'),
-                );
-              },
-            );
-          }
+            ),
+          );
         } else {
           showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
-                content: Text('Failed to connect to the server.'),
+                content: Text('Invalid server response.'),
               );
             },
           );
         }
-      } catch (error) {
+      } else {
         showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: Text('Error: $error'),
+              content: Text('Failed to connect to the server.'),
             );
           },
         );
       }
-    } else {
+    } catch (error) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            content: Text('Wrong password!'),
+            content: Text('Error: $error'),
           );
         },
       );
@@ -293,12 +282,6 @@ class _PresensiAuthSheetState extends State<PresensiAuthSheet> {
           Container(
             child: Column(
               children: [
-                SizedBox(height: 10),
-                AppTextField(
-                  controller: _passwordController,
-                  labelText: "Password",
-                  isPassword: true,
-                ),
                 SizedBox(height: 10),
                 Divider(),
                 SizedBox(height: 10),
