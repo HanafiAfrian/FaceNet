@@ -21,7 +21,6 @@ class PresensiDinasluarSheet extends StatefulWidget {
 }
 
 class _PresensiDinasluarSheetState extends State<PresensiDinasluarSheet> {
-  final _passwordController = TextEditingController();
   final _cameraService = locator<CameraService>();
   Location _locationController = Location();
   GoogleMapController? _mapController;
@@ -34,57 +33,46 @@ class _PresensiDinasluarSheetState extends State<PresensiDinasluarSheet> {
   }
 
   Future<void> _presensiDinasluar(BuildContext context, User user) async {
-    if (user.password == _passwordController.text) {
-      try {
-        final response = await http.post(
-          Uri.parse(Constants.BASEURL + Constants.ABSENSIMASUK),
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: {
-            'nip': user.nip,
-            'nama': user.user,
-            'jenis_absensi': 'Dinas Luar',
-            'latitude': _currentLocation?.latitude.toString() ?? '',
-            'longitude': _currentLocation?.longitude.toString() ?? '',
-          },
-        );
+    try {
+      final response = await http.post(
+        Uri.parse(Constants.BASEURL + Constants.ABSENSIMASUK),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'nip': user.nip,
+          'nama': user.user,
+          'jenis_absensi': 'Dinas Luar',
+          'latitude': _currentLocation?.latitude.toString() ?? '',
+          'longitude': _currentLocation?.longitude.toString() ?? '',
+        },
+      );
 
-        if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) => UploadFile(
-                user.nip,
-              ),
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => UploadFile(
+              user.nip,
             ),
-          );
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                content: Text('Failed to connect to the server.'),
-              );
-            },
-          );
-        }
-      } catch (error) {
+          ),
+        );
+      } else {
         showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: Text('Error: $error'),
+              content: Text('Failed to connect to the server.'),
             );
           },
         );
       }
-    } else {
+    } catch (error) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            content: Text('Wrong password!'),
+            content: Text('Error: $error'),
           );
         },
       );
@@ -147,12 +135,6 @@ class _PresensiDinasluarSheetState extends State<PresensiDinasluarSheet> {
           Container(
             child: Column(
               children: [
-                SizedBox(height: 10),
-                AppTextField(
-                  controller: _passwordController,
-                  labelText: "Password",
-                  isPassword: true,
-                ),
                 SizedBox(height: 10),
                 Divider(),
                 SizedBox(height: 10),
